@@ -12,7 +12,8 @@ class ServicesController extends Controller
      */
     public function index()
     {
-        //
+        return Services::with(['category', 'prestator', 'customer'])->get();
+
     }
 
     /**
@@ -28,7 +29,17 @@ class ServicesController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'prestator_id' => 'required|exists:prestators,id',
+            'customer_id' => 'required|exists:users,id',
+            'status' => 'required|string',
+            'service_moment' => 'required|date'
+        ]);
+
+        return Services::create($validated);
     }
 
     /**
@@ -37,6 +48,7 @@ class ServicesController extends Controller
     public function show(Services $services)
     {
         //
+        return $services->load(['category', 'prestator', 'customer']);
     }
 
     /**
@@ -52,7 +64,19 @@ class ServicesController extends Controller
      */
     public function update(Request $request, Services $services)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'description' => 'sometimes|string',
+            'category_id' => 'sometimes|exists:categories,id',
+            'prestator_id' => 'sometimes|exists:prestators,id',
+            'customer_id' => 'sometimes|exists:users,id',
+            'status' => 'sometimes|string',
+            'service_moment' => 'sometimes|date'
+        ]);
+
+        $services->update($validated);
+
+        return $services;
     }
 
     /**
@@ -60,6 +84,7 @@ class ServicesController extends Controller
      */
     public function destroy(Services $services)
     {
-        //
+        $services->delete();
+        return response(null, 204);
     }
 }

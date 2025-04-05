@@ -13,6 +13,7 @@ class DocumentsController extends Controller
     public function index()
     {
         //
+        return Documents::with('prestator')->get();
     }
 
     /**
@@ -29,6 +30,12 @@ class DocumentsController extends Controller
     public function store(Request $request)
     {
         //
+        $validated = $request->validate([
+            'prestator_id' => 'required|exists:prestators,id',
+            'path' => 'required|string'
+        ]);
+
+        return Documents::create($validated);
     }
 
     /**
@@ -37,6 +44,7 @@ class DocumentsController extends Controller
     public function show(Documents $documents)
     {
         //
+        return $documents->load('prestators');
     }
 
     /**
@@ -53,6 +61,13 @@ class DocumentsController extends Controller
     public function update(Request $request, Documents $documents)
     {
         //
+        $validated = $request->validate([
+            'path' => 'sometimes|string'
+        ]);
+
+        $documents->update($validated);
+
+        return $documents;
     }
 
     /**
@@ -61,5 +76,10 @@ class DocumentsController extends Controller
     public function destroy(Documents $documents)
     {
         //
+        $documents->delete();
+        return response(null, 204);
+    
+
+
     }
 }

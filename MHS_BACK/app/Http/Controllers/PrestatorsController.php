@@ -12,7 +12,7 @@ class PrestatorsController extends Controller
      */
     public function index()
     {
-        //
+        return Prestators::with('user')->get();
     }
 
     /**
@@ -28,7 +28,15 @@ class PrestatorsController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id|unique:prestators,user_id',
+            'description' => 'required|string',
+            'validate' => 'boolean',
+            'path' => 'nullable|string',
+            'address' => 'nullable|string'
+        ]);
+
+        return Prestators::create($validated);
     }
 
     /**
@@ -36,7 +44,10 @@ class PrestatorsController extends Controller
      */
     public function show(Prestators $prestators)
     {
-        //
+        
+        return $prestators->load('user');
+        
+       
     }
 
     /**
@@ -53,6 +64,17 @@ class PrestatorsController extends Controller
     public function update(Request $request, Prestators $prestators)
     {
         //
+        $validated = $request->validate([
+            'user_id'=> 'nullable|exists:users,id|unique:prestators,user_id,'.$prestators->id,
+            'description' => 'sometimes|string',
+            'validate' => 'sometimes|boolean',
+            'path' => 'nullable|string',
+            'address' => 'nullable|string'
+        ]);
+
+        $prestators->update($validated);
+
+        return $prestators;
     }
 
     /**
@@ -61,5 +83,8 @@ class PrestatorsController extends Controller
     public function destroy(Prestators $prestators)
     {
         //
+        $prestators->delete();
+        return response(null, 204);
+
     }
 }

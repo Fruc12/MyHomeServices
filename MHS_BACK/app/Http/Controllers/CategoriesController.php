@@ -12,7 +12,8 @@ class CategoriesController extends Controller
      */
     public function index()
     {
-        //
+    
+        return Categories::all();
     }
 
     /**
@@ -28,7 +29,13 @@ class CategoriesController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string'
+        ]);
+
+        return Categories::create($validated);
+
     }
 
     /**
@@ -37,6 +44,7 @@ class CategoriesController extends Controller
     public function show(Categories $categories)
     {
         //
+        return $categories;
     }
 
     /**
@@ -52,7 +60,14 @@ class CategoriesController extends Controller
      */
     public function update(Request $request, Categories $categories)
     {
-        //
+        $validated = $request->validate([
+            'nom' => 'sometimes|string|max:255',
+            'description' => 'sometimes|string'
+        ]);
+
+        $categories->update($validated);
+
+        return $categories;
     }
 
     /**
@@ -60,6 +75,8 @@ class CategoriesController extends Controller
      */
     public function destroy(Categories $categories)
     {
-        //
+        $categories->delete();
+        return response(null, 204);
+        
     }
 }

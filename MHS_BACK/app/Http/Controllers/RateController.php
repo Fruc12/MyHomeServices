@@ -13,6 +13,7 @@ class RateController extends Controller
     public function index()
     {
         //
+        return Rate::with('prestation')->get();
     }
 
     /**
@@ -29,6 +30,14 @@ class RateController extends Controller
     public function store(Request $request)
     {
         //
+        $validated = $request->validate([
+            'prestatation_id' => 'required|exists:services,id',
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string'
+        ]);
+
+        return Rate::create($validated);
+
     }
 
     /**
@@ -37,6 +46,7 @@ class RateController extends Controller
     public function show(Rate $rate)
     {
         //
+        return $rate->load('prestations');
     }
 
     /**
@@ -53,6 +63,14 @@ class RateController extends Controller
     public function update(Request $request, Rate $rate)
     {
         //
+        $validated = $request->validate([
+            'rating' => 'sometimes|integer|min:1|max:5',
+            'comment' => 'nullable|string'
+        ]);
+
+        $rate->update($validated);
+
+        return $rate;
     }
 
     /**
@@ -61,5 +79,8 @@ class RateController extends Controller
     public function destroy(Rate $rate)
     {
         //
+        $rate->delete();
+        return response(null, 204);
+
     }
 }
