@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/auth/register_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -6,16 +8,23 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: MainScreen(),
+      home: LoginScreen(), // Point d'entrée initial modifié pour la LoginScreen
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/register': (context) => const RegisterScreen(),
+        '/home': (context) => const MainScreen(),
+      },
     );
   }
 }
 
 class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -264,39 +273,6 @@ class AccountScreen extends StatelessWidget {
               leading: Icon(Icons.location_on, color: Colors.orange),
               title: Text("Adresse"),
               subtitle: Text("Cotonou, Bénin"),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class LoginScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text("Connexion", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-            SizedBox(height: 20),
-            TextField(decoration: InputDecoration(labelText: "Email")),
-            SizedBox(height: 10),
-            TextField(decoration: InputDecoration(labelText: "Mot de passe"), obscureText: true),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => MainScreen()),
-                );
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-              child: Text("Se connecter", style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
