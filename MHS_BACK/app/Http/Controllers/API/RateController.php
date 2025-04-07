@@ -1,19 +1,20 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
-use App\Models\Category;
+use App\Http\Controllers\Controller;
+use App\Models\Rate;
 use Illuminate\Http\Request;
 
-class CategoryController extends Controller
+class RateController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-    
-        return Category::all();
+        //
+        return Rate::with('prestation')->get();
     }
 
     /**
@@ -29,28 +30,30 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
+        //
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'required|string'
+            'prestatation_id' => 'required|exists:services,id',
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string'
         ]);
 
-        return Category::create($validated);
+        return Rate::create($validated);
 
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Category $categories)
+    public function show(Rate $rate)
     {
         //
-        return $categories;
+        return $rate->load('prestations');
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Category $categories)
+    public function edit(Rate $rate)
     {
         //
     }
@@ -58,25 +61,27 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Category $categories)
+    public function update(Request $request, Rate $rate)
     {
+        //
         $validated = $request->validate([
-            'nom' => 'sometimes|string|max:255',
-            'description' => 'sometimes|string'
+            'rating' => 'sometimes|integer|min:1|max:5',
+            'comment' => 'nullable|string'
         ]);
 
-        $categories->update($validated);
+        $rate->update($validated);
 
-        return $categories;
+        return $rate;
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Category $categories)
+    public function destroy(Rate $rate)
     {
-        $categories->delete();
+        //
+        $rate->delete();
         return response(null, 204);
-        
+
     }
 }
