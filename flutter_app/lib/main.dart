@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/auth/login_screen.dart';
+import 'screens/auth/prestator_screen.dart';
 import 'screens/auth/register_screen.dart';
 
 void main() {
@@ -18,6 +19,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
         '/home': (context) => const MainScreen(),
+        '/prestator': (context) => const PrestatorScreen(),
       },
     );
   }

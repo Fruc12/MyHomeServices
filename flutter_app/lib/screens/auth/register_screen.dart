@@ -1,176 +1,165 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:flutter_app/main.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({Key? key}) : super(key: key); // Ajout du paramètre key
+  const RegisterScreen({super.key});
 
   @override
-  RegisterScreenState createState() => RegisterScreenState(); // Retrait du _ pour la classe publique
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class RegisterScreenState extends State<RegisterScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
+class _RegisterScreenState extends State<RegisterScreen> {
+  String? selectedRole;
 
-  String? _selectedRole;
-  XFile? _certificateFile;
-  final List<String> _roles = ['customer', 'prestator', 'admin'];
-
-  final ImagePicker _picker = ImagePicker();
-
-  Future<void> _pickImage() async {
-    try {
-      final file = await _picker.pickImage(source: ImageSource.gallery);
-      if (file != null) {
-        setState(() {
-          _certificateFile = file;
-        });
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur lors de la sélection du fichier")),
-      );
-    }
-  }
+  final List<String> roles = ['Administrateur', 'Client', 'Prestataire'];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Créer un compte")),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: "Nom complet"),
-                validator: (value) => value?.isEmpty ?? true ? "Champ obligatoire" : null,
+      body: Stack(
+        children: [
+          // Dégradé de fond
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFFF3904F), Color(0xFF3B4371)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: "Email"),
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) => value?.contains('@') ?? false ? null : "Email invalide",
-              ),
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _passwordController,
-                decoration: const InputDecoration(labelText: "Mot de passe"),
-                obscureText: true,
-                validator: (value) => (value?.length ?? 0) >= 6 ? null : "6 caractères minimum",
-              ),
-              const SizedBox(height: 16),
-
-              DropdownButtonFormField<String>(
-                value: _selectedRole,
-                hint: const Text("Sélectionnez votre rôle"),
-                items: _roles.map((role) {
-                  return DropdownMenuItem(
-                    value: role,
-                    child: Text(
-                        role == 'prestator' ? 'Prestataire' :
-                        role == 'customer' ? 'Client' : 'Administrateur'
-                    ),
-                  );
-                }).toList(),
-                onChanged: (value) => setState(() => _selectedRole = value),
-                validator: (value) => value == null ? "Sélectionnez un rôle" : null,
-              ),
-              const SizedBox(height: 24),
-
-              if (_selectedRole == 'prestator') ...[
-                const Text("Informations prestataire",
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 16),
-
-                TextFormField(
-                  controller: _descriptionController,
-                  decoration: const InputDecoration(labelText: "Description"),
-                  maxLines: 3,
-                  validator: (value) => value?.isEmpty ?? true ? "Champ obligatoire" : null,
-                ),
-                const SizedBox(height: 16),
-
-                TextFormField(
-                  controller: _addressController,
-                  decoration: const InputDecoration(labelText: "Adresse"),
-                  validator: (value) => value?.isEmpty ?? true ? "Champ obligatoire" : null,
-                ),
-                const SizedBox(height: 16),
-
-                const Text("Certificat/Diplôme"),
-                const SizedBox(height: 8),
-                OutlinedButton(
-                  onPressed: _pickImage,
-                  child: Text(_certificateFile == null
-                      ? "Choisir un fichier"
-                      : "Fichier sélectionné"),
-                ),
-                if (_certificateFile != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      _certificateFile!.name,
-                      style: const TextStyle(fontSize: 12),
+            ),
+          ),
+          // Carte transparente avec effet blur
+          Center(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(25.0),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.85,
+                  padding: const EdgeInsets.all(24.0),
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(0, 15, 0, 0),
+                    borderRadius: BorderRadius.circular(25.0),
+                    border: Border.all(
+                      color: const Color.fromARGB(60, 255, 255, 255),
                     ),
                   ),
-                const SizedBox(height: 16),
-              ],
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Créer un compte',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      _buildTextField('Nom complet'),
+                      const SizedBox(height: 20),
+                      _buildTextField('Email', keyboardType: TextInputType.emailAddress),
+                      const SizedBox(height: 20),
+                      _buildTextField('Mot de passe', obscureText: true),
+                      const SizedBox(height: 20),
 
-              ElevatedButton(
-                onPressed: _submitForm,
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
+
+                      DropdownButtonFormField<String>(
+
+                        dropdownColor: const Color(0xFFFFFFFF).withAlpha((0.9 * 255).toInt()),
+
+                        value: selectedRole,
+                        style: const TextStyle(color: Colors.black),
+                        decoration: InputDecoration(
+                          labelText: 'Rôle',
+                          labelStyle: const TextStyle(color: Colors.white),
+                          filled: true,
+                          fillColor: const Color.fromARGB(40, 255, 255, 255),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        items: roles.map((role) {
+                          return DropdownMenuItem(
+                            value: role,
+                            child: Text(role),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedRole = value;
+                          });
+                        },
+                      ),
+
+                      const SizedBox(height: 30),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (selectedRole == 'Prestataire') {
+                            Navigator.pushReplacementNamed(context, '/prestator');
+                          } else {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => MainScreen()),
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 60),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          elevation: 10,
+                        ),
+                        child: const Text(
+                          "S'inscrire",
+                          style: TextStyle(fontSize: 16, color: Colors.white),
+                        ),
+
+                      ),
+                      const SizedBox(height: 10),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/login');
+                        },
+                        child: const Text(
+                          "Vous avez un compte  ? Se connecter",
+                          style: TextStyle(color: Colors.lightBlueAccent),
+                        ),
+                      ),
+                    ],
+
+                  ),
                 ),
-                child: const Text("S'inscrire"),
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  void _submitForm() {
-    if (_formKey.currentState?.validate() ?? false) {
-      final userData = {
-        'name': _nameController.text,
-        'email': _emailController.text,
-        'password': _passwordController.text,
-        'role': _selectedRole,
-        if (_selectedRole == 'prestator') ...{
-          'description': _descriptionController.text,
-          'address': _addressController.text,
-          'certificate': _certificateFile?.path,
-        }
-      };
-
-      // TODO: Implémenter la logique d'enregistrement
-      debugPrint(userData.toString());
-
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (_) => HomeScreen()),
-      // );
-    }
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _descriptionController.dispose();
-    _addressController.dispose();
-    super.dispose();
+  Widget _buildTextField(String label,
+      {bool obscureText = false, TextInputType keyboardType = TextInputType.text}) {
+    return TextFormField(
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.white),
+        filled: true,
+        fillColor: const Color.fromARGB(40, 255, 255, 255),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
   }
 }
+
+
