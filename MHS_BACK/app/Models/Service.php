@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Services extends Model
+class Service extends Model
 {
     use HasFactory;
 
@@ -21,16 +21,21 @@ class Services extends Model
 
     public function category()
     {
-        return $this->belongsTo(Categories::class);
+        return $this->belongsTo(Category::class);
     }
 
     public function prestator()
     {
-        return $this->belongsTo(Prestators::class);
+        return $this->belongsTo(User::class, 'prestator_id');
     }
 
     public function customer()
     {
         return $this->belongsTo(User::class, 'customer_id');
+    }
+
+    public function rate()
+    {
+        return $this->hasOne(Rate::class);
     }
 }

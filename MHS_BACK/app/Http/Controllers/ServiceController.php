@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Services;
+use App\Models\Service;
 use Illuminate\Http\Request;
 
-class ServicesController extends Controller
+class ServiceController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return Services::with(['category', 'prestator', 'customer'])->get();
+        return Service::with(['category', 'prestator', 'customer'])->get();
 
     }
 
@@ -39,13 +39,13 @@ class ServicesController extends Controller
             'service_moment' => 'required|date'
         ]);
 
-        return Services::create($validated);
+        return Service::create($validated);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Services $services)
+    public function show(Service $services)
     {
         //
         return $services->load(['category', 'prestator', 'customer']);
@@ -54,7 +54,7 @@ class ServicesController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Services $services)
+    public function edit(Service $services)
     {
         //
     }
@@ -62,7 +62,7 @@ class ServicesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Services $services)
+    public function update(Request $request, Service $services)
     {
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
@@ -82,7 +82,7 @@ class ServicesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Services $services)
+    public function destroy(Service $services)
     {
         $services->delete();
         return response(null, 204);

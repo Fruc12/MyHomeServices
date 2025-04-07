@@ -6,13 +6,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Prestators;
-use App\Models\Services;
-use App\Models\Categories;
+use App\Models\Prestator;
+use App\Models\Service;
+use App\Models\Category;
+use Laravel\Sanctum\HasApiTokens;
+
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -20,7 +22,6 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'category_id',
         'name',
         'email',
         'password',
@@ -49,17 +50,19 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-    public function prestator()
+
+    public function prestations()
     {
-        return $this->hasOne(Prestators::class, 'user_id');
-    }
-    public function service()
-    {
-        return $this->hasMany(Services::class, 'user_id');
+        return $this->hasMany(Service::class, 'prestator_id');
     }
 
-    public function category()
+    public function services()
     {
-        return $this->belongsTo(Categories::class);
+        return $this->hasMany(Service::class, 'customer_id');
+    }
+
+    public function prestator()
+    {
+        return $this->hasOne(Prestator::class);
     }
 }

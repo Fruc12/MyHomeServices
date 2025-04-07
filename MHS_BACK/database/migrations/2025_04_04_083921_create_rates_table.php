@@ -13,7 +13,13 @@ return new class extends Migration
     {
         Schema::create('rates', function (Blueprint $table) {
             $table->id();
-            $table->integer('prestator_id')->index();
+            $table->unsignedBigInteger('service_id')->index();
+            
+            $table->unsignedTinyInteger('rating');
+            $table->string('comment')->nullable();
+
+            $table->foreign('service_id')->references('id')->on('services')->cascadeOnDelete();
+
             $table->timestamps();
         });
     }

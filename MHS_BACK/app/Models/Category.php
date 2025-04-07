@@ -5,17 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Documents extends Model
+class Category extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'prestator_id',
-        'path'
+        'name',
+        'description'
     ];
 
-    public function prestator()
+    public function services()
     {
-        return $this->belongsTo(Prestators::class);
+        return $this->hasMany(Service::class);
     }
 }

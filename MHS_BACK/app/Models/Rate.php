@@ -10,13 +10,13 @@ class Rate extends Model
     use HasFactory;
 
     protected $fillable = [
-        'prestatation_id',
+        'service_id',
+        'comment',
         'rating',
-        'comment'
     ];
 
-    public function prestation()
+    public function service()
     {
-        return $this->belongsTo(Services::class, 'prestatation_id');
+        return $this->belongsTo(Service::class);
     }
 }

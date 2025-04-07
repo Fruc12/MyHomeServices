@@ -13,11 +13,15 @@ return new class extends Migration
     {
         Schema::create('prestators', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id')->index();
+            $table->unsignedBigInteger('user_id')->index();
+
             $table->string('description');
             $table->boolean('validate')->default(false);
-            $table->string(column: 'path');
+            $table->string('path');
             $table->string('address');
+
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
+
             $table->timestamps();
         });
     }

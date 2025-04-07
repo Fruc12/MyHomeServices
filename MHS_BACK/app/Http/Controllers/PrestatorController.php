@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Prestators;
+use App\Models\Prestator;
 use Illuminate\Http\Request;
 
-class PrestatorsController extends Controller
+class PrestatorController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return Prestators::with('user')->get();
+        return Prestator::with('user')->get();
     }
 
     /**
@@ -36,13 +36,13 @@ class PrestatorsController extends Controller
             'address' => 'nullable|string'
         ]);
 
-        return Prestators::create($validated);
+        return Prestator::create($validated);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Prestators $prestators)
+    public function show(Prestator $prestators)
     {
         
         return $prestators->load('user');
@@ -53,7 +53,7 @@ class PrestatorsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Prestators $prestators)
+    public function edit(Prestator $prestators)
     {
         //
     }
@@ -61,7 +61,7 @@ class PrestatorsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Prestators $prestators)
+    public function update(Request $request, Prestator $prestators)
     {
         //
         $validated = $request->validate([
@@ -80,7 +80,7 @@ class PrestatorsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Prestators $prestators)
+    public function destroy(Prestator $prestators)
     {
         //
         $prestators->delete();
