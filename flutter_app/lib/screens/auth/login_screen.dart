@@ -1,16 +1,29 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/main.dart'; // Vérifie bien le chemin
+import '/main.dart';
+import '/services/auth_service.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  bool isLoading = false;
+
+  final AuthService _authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-
+          // Dégradé de fond
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -22,9 +35,7 @@ class LoginScreen extends StatelessWidget {
           ),
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 15.0, sigmaY: 15.0),
-            child: Container(
-              color: Colors.transparent,
-            ),
+            child: Container(color: Colors.transparent),
           ),
           Center(
             child: Padding(
@@ -32,55 +43,68 @@ class LoginScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(24.0),
                 decoration: BoxDecoration(
-                  color: Colors.white.withAlpha(60), // transparent blanc
+                  color: Colors.white.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: Colors.white38),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      "Connexion",
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildTextField("Email", false),
-                    const SizedBox(height: 16),
-                    _buildTextField("Mot de passe", true),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => MainScreen()),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 50),
-                        backgroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        "Connexion",
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
-                      child: const Text(
-                        "Se connecter",
-                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      const SizedBox(height: 20),
+                      _buildTextField(
+                        controller: emailController,
+                        label: "Email",
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (value) {
+                          if (value!.isEmpty) return 'Email requis';
+                          final emailRegex = RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$');
+                          return emailRegex.hasMatch(value) ? null : 'Email invalide';
+                        },
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/register');
-                      },
-                      child: const Text(
-                        "Vous n'avez pas un compte  ? Créer un compte",
-                        style: TextStyle(color: Colors.lightBlueAccent),
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                        controller: passwordController,
+                        label: "Mot de passe",
+                        obscureText: true,
+                        validator: (value) => value!.isEmpty ? 'Mot de passe requis' : null,
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 24),
+                      isLoading
+                          ? const CircularProgressIndicator()
+                          : ElevatedButton(
+                        onPressed: _login,
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 50),
+                          backgroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: const Text(
+                          "Se connecter",
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextButton(
+                        onPressed: () => Navigator.pushNamed(context, '/register'),
+                        child: const Text(
+                          "Vous n'avez pas de compte ? Créer un compte",
+                          style: TextStyle(color: Colors.lightBlueAccent),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -90,15 +114,45 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTextField(String label, bool obscureText) {
-    return TextField(
+  Future<void> _login() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      setState(() => isLoading = true);
+
+      final email = emailController.text.trim();
+      final password = passwordController.text.trim();
+
+      final success = await _authService.login(email, password);
+
+      setState(() => isLoading = false);
+
+      if (success) {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainScreen()));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Email ou mot de passe incorrect.')),
+        );
+      }
+    }
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String? Function(String?) validator,
+    bool obscureText = false,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return TextFormField(
+      controller: controller,
       obscureText: obscureText,
-      style: const TextStyle(color: Colors.black),
+      keyboardType: keyboardType,
+      validator: validator,
+      style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Colors.black87),
+        labelStyle: const TextStyle(color: Colors.white),
         filled: true,
-        fillColor: const Color.fromARGB(40, 255, 255, 255), // semi-transparent
+        fillColor: Colors.white.withOpacity(0.2),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
           borderSide: BorderSide.none,
