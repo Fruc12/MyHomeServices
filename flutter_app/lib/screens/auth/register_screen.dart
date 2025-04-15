@@ -130,7 +130,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           onPressed: () => Navigator.pushNamed(context, '/login'),
                           child: const Text(
                             "Vous avez un compte ? Se connecter",
-                            style: TextStyle(color: Colors.lightBlueAccent),
+                            style: TextStyle(color: Colors.white),
                           ),
                         ),
                       ],

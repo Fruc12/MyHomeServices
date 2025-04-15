@@ -100,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: () => Navigator.pushNamed(context, '/register'),
                         child: const Text(
                           "Vous n'avez pas de compte ? Créer un compte",
-                          style: TextStyle(color: Colors.lightBlueAccent),
+                          style: TextStyle(color: Colors.white),
                         ),
                       ),
                     ],
