@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -44,6 +45,14 @@ class UserController extends Controller
     public function show(User $user)
     {
         return $user;
+    }
+
+    public function auth_user()
+    {
+        return response()->json([
+            'success' => true,
+            'data' => Auth::user(),
+        ]);
     }
 
     public function update(Request $request, User $user)

@@ -13,16 +13,12 @@ class CategoryController extends Controller
      */
     public function index()
     {
-    
-        return Category::all();
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        $categories = Category::all();
+        return response()->json([
+            'success' => true,
+            'message' => 'Liste des catégories récupérée avec succès.',
+            'data' => $categories
+        ], 200);
     }
 
     /**
@@ -30,54 +26,91 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
+        // Validation des données
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'required|string'
+            'description' => 'required|string',
         ]);
 
-        return Category::create($validated);
+        // Création de la catégorie
+        $categorie = Category::create($validated);
 
+        return response()->json([
+            'success' => true,
+            'message' => 'Catégorie créée avec succès.',
+            'data' => $categorie
+        ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Category $categories)
+    public function show($categorie_id)
     {
-        //
-        return $categories;
-    }
+        $categorie = Category::find($categorie_id);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Category $categories)
-    {
-        //
+        if (!$categorie) {
+            return response()->json([
+                // 'success' => false,
+                'message' => 'Catégorie non trouvée.'
+            ], 404);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Catégorie récupérée avec succès.',
+            'data' => $categorie
+        ], 200);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Category $categories)
+    public function update(Request $request, $categorie_id)
     {
+        // Validation des données
         $validated = $request->validate([
-            'nom' => 'sometimes|string|max:255',
-            'description' => 'sometimes|string'
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
         ]);
 
-        $categories->update($validated);
+        // Mise à jour de la catégorie
+        $categorie = Category::find($categorie_id);
 
-        return $categories;
+        if (!$categorie) {
+            return response()->json([
+                // 'success' => false,
+                'message' => 'Catégorie non trouvée.'
+            ], 404);
+        }
+
+        $categorie->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Catégorie mise à jour avec succès.',
+            'data' => $categorie
+        ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Category $categories)
+    public function destroy($categorie_id)
     {
-        $categories->delete();
-        return response(null, 204);
-        
+        $categorie = Category::find($categorie_id);
+
+        if (!$categorie) {
+            return response()->json([
+                // 'success' => false,
+                'message' => 'Catégorie non trouvée.'
+            ], 404);
+        }
+
+        $categorie->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Catégorie supprimée avec succès.'
+        ], 200);
     }
 }

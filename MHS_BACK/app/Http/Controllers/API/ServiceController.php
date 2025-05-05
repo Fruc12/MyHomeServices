@@ -13,16 +13,12 @@ class ServiceController extends Controller
      */
     public function index()
     {
-        return Service::with(['category', 'prestator', 'customer'])->get();
-
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        $services = Service::with(['category', 'prestator', 'customer'])->get();
+        return response()->json([
+            'success' => true,
+            'message' => 'Liste des services récupérée avec succès.',
+            'data' => $services
+        ], 200);
     }
 
     /**
@@ -31,61 +27,99 @@ class ServiceController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'prestator_id' => 'nullable|exists:users,id',
+            'customer_id' => 'nullable|exists:users,id',
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'category_id' => 'required|exists:categories,id',
-            'prestator_id' => 'required|exists:prestators,id',
-            'customer_id' => 'required|exists:users,id',
-            'status' => 'required|string',
-            'service_moment' => 'required|date'
+            'status' => 'required|in:pending,in_progress,completed,canceled,reported',
+            'service_moment' => 'nullable|date'
         ]);
 
-        return Service::create($validated);
+        // Création du service
+        $service = Service::create($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Service créée avec succès.',
+            'data' => $service
+        ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Service $services)
+    public function show($service_id)
     {
-        //
-        return $services->load(['category', 'prestator', 'customer']);
-    }
+        $service = Service::with(['category', 'prestator', 'customer'])->find($service_id);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Service $services)
-    {
-        //
+        if (!$service) {
+            return response()->json([
+                // 'success' => false,
+                'message' => 'Catégorie non trouvée.'
+            ], 404);
+        }
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Catégorie récupérée avec succès.',
+            'data' => $service
+        ], 200);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Service $services)
+    public function update(Request $request, $service_id)
     {
         $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'description' => 'sometimes|string',
-            'category_id' => 'sometimes|exists:categories,id',
-            'prestator_id' => 'sometimes|exists:prestators,id',
-            'customer_id' => 'sometimes|exists:users,id',
-            'status' => 'sometimes|string',
-            'service_moment' => 'sometimes|date'
+            'prestator_id' => 'nullable|exists:users,id',
+            'customer_id' => 'nullable|exists:users,id',
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'status' => 'required|in:pending,in_progress,completed,canceled,reported',
+            'service_moment' => 'nullable|date'
         ]);
 
-        $services->update($validated);
+        // Création du service
+        $service = Service::find($service_id);
 
-        return $services;
+        if (!$service) {
+            return response()->json([
+                // 'success' => false,
+                'message' => 'Service non trouvé.'
+            ], 404);
+        }
+
+        $service->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Service mis a jour avec succès.',
+            'data' => $service
+        ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Service $services)
+    public function destroy($service_id)
     {
+        $services = Service::find($service_id);
+
+        if (!$services) {
+            return response()->json([
+                // 'success' => false,
+                'message' => 'Service non trouvé.'
+            ], 404);
+        }
+
         $services->delete();
-        return response(null, 204);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Service supprimé avec succès.'
+        ], 200);
     }
 }
