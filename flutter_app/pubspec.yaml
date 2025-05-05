@@ -43,21 +43,27 @@ dependencies:
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.3.10
   flutter_test:
     sdk: flutter
-
-
-flutter_launcher_icons:
-  android: true
-  image_path: "assets/icons/launch.jpg"
-
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  google_fonts: ^5.1.0
 
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/launch.jpg"
+
+flutter_native_splash:
+  color: "#F5F5DC" # beige pâle (tu peux ajuster)
+  image: "assets/icons/launch.jpg" # icône centrée
+  android: true
+  ios: true
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
