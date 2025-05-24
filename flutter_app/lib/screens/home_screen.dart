@@ -1,6 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/screens/prestator_list_screen.dart';
+import '/services/auth_service.dart'; // Assurez-vous que le chemin est correct
+import '/services/user_service.dart'; // Assurez-vous que le chemin est correct
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String _userName = ''; // Variable pour stocker le nom de l'utilisateur
+  bool _isLoading = true; // Pour gérer l'état de chargement
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    try {
+      final UserService _userService = UserService();
+      final userData = await _userService.fetchUser();
+      if (userData != null) {
+        setState(() {
+          _userName = userData['name'] ?? 'Utilisateur'; // Récupère le nom, ou 'Utilisateur' par défaut
+        });
+      }
+    } catch (e) {
+      print('Erreur lors du chargement du nom de l\'utilisateur : $e');
+      setState(() {
+        _userName = 'Utilisateur'; // Nom par défaut en cas d'erreur
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +59,12 @@ class HomeScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: 40),
-                  Text("Bonjour Fructueux,", style: TextStyle(fontSize: 18, color: Colors.white)),
+                  _isLoading
+                      ? CircularProgressIndicator(color: Colors.white) // Affiche un indicateur de chargement
+                      : Text(
+                    "Salut, $_userName,", // Utilise le nom de l'utilisateur
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  ),
                   SizedBox(height: 5),
                   Text("Envie d'une session ?", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
                   SizedBox(height: 20),
@@ -52,13 +95,12 @@ class HomeScreen extends StatelessWidget {
                   SizedBox(height: 20),
                   Text("Nos clients adorent", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   SizedBox(height: 10),
-                  _buildCard("Ménage régulier classique", "À partir de 3 000  FCFA/h", "En savoir plus"),
+                  _buildCard("Ménage régulier classique", "À partir de 3 000  FCFA/h", "En savoir plus"),
                   SizedBox(height: 20),
                   Text("Faites-nous confiance", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   _buildTrustSection("Réservation simple et sécurisée", "Découvrez le mode d'emploi"),
                   _buildTrustSection("Des pros certifiés proches de chez vous", "Vous méritez le meilleur"),
                   _buildTrustSection("Annulation sans frais", "Jusqu'à 24h avant la session"),
-                  // _buildTrustSection("Assurance Wecasa incluse", "Vous êtes couvert en cas de pépin"),
                 ],
               ),
             )
@@ -69,17 +111,30 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildServiceButton(String title, IconData icon) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        CircleAvatar(
-          radius: 30,
-          backgroundColor: Colors.white,
-          child: Icon(icon, size: 30, color: Colors.black),
-        ),
-        SizedBox(height: 5),
-        Text(title, textAlign: TextAlign.center, style: TextStyle(fontSize: 12)),
-      ],
+    return InkWell( // Utilisation de InkWell pour la détection du tap
+      onTap: () {
+        if (title == "Ménage") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PrestatorListScreen(categoryId: 1, categoryName: title),
+            ),
+          );
+        }
+        // Ajoutez ici la logique pour les autres catégories
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: 30,
+            backgroundColor: Colors.white,
+            child: Icon(icon, size: 30, color: Colors.black),
+          ),
+          SizedBox(height: 5),
+          Text(title, textAlign: TextAlign.center, style: TextStyle(fontSize: 12)),
+        ],
+      ),
     );
   }
 

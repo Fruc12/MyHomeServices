@@ -5,7 +5,8 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Prestator;
 use Illuminate\Http\Request;
-
+use Illuminate\Http\JsonResponse;
+use App\Models\User;
 class PrestatorController extends Controller
 {
     /**
@@ -14,6 +15,25 @@ class PrestatorController extends Controller
     public function index()
     {
         return Prestator::with('user')->get();
+    }
+    public function getPrestatorsByCategory(int $categoryId): JsonResponse
+    {
+        $prestators = Prestator::whereHas('user', function ($query) use ($categoryId) {
+            $query->whereHas('services', function ($subQuery) use ($categoryId) {
+                $subQuery->where('category_id', $categoryId);
+            });
+        })->with('user')->get(['user_id', 'description', 'address']); // Récupérer les informations nécessaires
+
+        $formattedPrestators = $prestators->map(function ($prestator) {
+            return [
+                'name' => $prestator->user->name, // Assurez-vous que la relation 'user' est définie dans le modèle Prestator
+                'description' => $prestator->description,
+                'address' => $prestator->address,
+                // Ajoutez d'autres informations si nécessaire
+            ];
+        });
+
+        return response()->json(['prestators' => $formattedPrestators]);
     }
 
     /**
