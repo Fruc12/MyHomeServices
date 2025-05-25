@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/screens/account_screen.dart';
-import 'screens/auth/login_screen.dart';
-import 'screens/auth/prestator_screen.dart';
-import 'screens/auth/register_screen.dart';
-import 'screens/home_screen.dart';
-import 'screens/session_screen.dart';
+import 'package:flutter_app/screens/auth/login_screen.dart';
+import 'package:flutter_app/screens/auth/prestator_screen.dart';
+import 'package:flutter_app/screens/auth/register_screen.dart';
+import 'package:flutter_app/screens/home_screen.dart';
+import 'package:flutter_app/screens/session_screen.dart';
+import 'services/auth_service.dart'; // Assurez-vous que ce fichier existe bien
 
 void main() {
   runApp(MyApp());
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginScreen(), // Point d'entrée initial modifié pour la LoginScreen
+      home: AuthChecker(),
       routes: {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
@@ -28,8 +29,54 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class AuthChecker extends StatefulWidget {
+  const AuthChecker({super.key});
+
+  @override
+  _AuthCheckerState createState() => _AuthCheckerState();
+}
+
+class _AuthCheckerState extends State<AuthChecker> {
+  bool _isLoading = true;
+  bool _isAuthenticated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAuthStatus();
+  }
+
+  Future<void> _checkAuthStatus() async {
+    try {
+      final isAuth = await AuthService().checkAuthStatus();
+      setState(() {
+        _isAuthenticated = isAuth;
+        _isLoading = false;
+      });
+    } catch (e) {
+      // En cas d'erreur, on considère l'utilisateur non authentifié
+      setState(() {
+        _isAuthenticated = false;
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    return _isAuthenticated ? const MainScreen() : const LoginScreen();
+  }
+}
+
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -56,7 +103,7 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        items: [
+        items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Réserver'),
           BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Sessions'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Compte'),

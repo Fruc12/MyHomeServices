@@ -76,4 +76,24 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
   }
+
+  Future<bool> checkAuthStatus() async {
+    final url = Uri.parse('${apiUrl}auth'); // à adapter
+    final token = await getToken(); // implémente selon ton système
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['success'];
+    }
+
+    return false;
+  }
 }

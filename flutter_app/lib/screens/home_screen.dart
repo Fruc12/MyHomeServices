@@ -21,10 +21,18 @@ class HomeScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: 40),
-                  Text("Bonjour Fructueux,", style: TextStyle(fontSize: 18, color: Colors.white)),
+                  Text(
+                    "Bonjour Fructueux,",
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  ),
                   SizedBox(height: 5),
-                  Text("Envie d'une session ?", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+                  Text(
+                    "Envie d'une session ?",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
                   SizedBox(height: 20),
+
+                  // Remplacé GridView par Wrap
                   GridView.count(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
@@ -58,7 +66,6 @@ class HomeScreen extends StatelessWidget {
                   _buildTrustSection("Réservation simple et sécurisée", "Découvrez le mode d'emploi"),
                   _buildTrustSection("Des pros certifiés proches de chez vous", "Vous méritez le meilleur"),
                   _buildTrustSection("Annulation sans frais", "Jusqu'à 24h avant la session"),
-                  // _buildTrustSection("Assurance Wecasa incluse", "Vous êtes couvert en cas de pépin"),
                 ],
               ),
             )
@@ -69,17 +76,20 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildServiceButton(String title, IconData icon) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        CircleAvatar(
-          radius: 30,
-          backgroundColor: Colors.white,
-          child: Icon(icon, size: 30, color: Colors.black),
-        ),
-        SizedBox(height: 5),
-        Text(title, textAlign: TextAlign.center, style: TextStyle(fontSize: 12)),
-      ],
+    return SizedBox(
+      width: 100,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: 30,
+            backgroundColor: Colors.white,
+            child: Icon(icon, size: 30, color: Colors.black),
+          ),
+          SizedBox(height: 5),
+          Text(title, textAlign: TextAlign.center, style: TextStyle(fontSize: 12)),
+        ],
+      ),
     );
   }
 
