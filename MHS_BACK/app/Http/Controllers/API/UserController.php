@@ -47,14 +47,6 @@ class UserController extends Controller
         return $user;
     }
 
-    public function auth_user()
-    {
-        return response()->json([
-            'success' => true,
-            'data' => Auth::user(),
-        ]);
-    }
-
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([
