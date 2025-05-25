@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     } finally {
       setState(() {
-        _isLoading = false;
+        _isLoading = false; // Le chargement est terminé
       });
     }
   }
@@ -95,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   SizedBox(height: 20),
                   Text("Nos clients adorent", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   SizedBox(height: 10),
-                  _buildCard("Ménage régulier classique", "À partir de 3 000  FCFA/h", "En savoir plus"),
+                  _buildCard("Ménage régulier classique", "À partir de 3 000 FCFA/h", "En savoir plus"),
                   SizedBox(height: 20),
                   Text("Faites-nous confiance", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   _buildTrustSection("Réservation simple et sécurisée", "Découvrez le mode d'emploi"),
@@ -111,17 +111,47 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildServiceButton(String title, IconData icon) {
-    return InkWell( // Utilisation de InkWell pour la détection du tap
+    return InkWell(
       onTap: () {
+        int? categoryId; // Variable pour stocker l'ID de la catégorie (peut être null initialement)
+
+        // IMPORTANT: Assurez-vous que ces IDs correspondent aux IDs réels de vos catégories dans la base de données Laravel.
+        // Si vos IDs sont différents, vous devrez les ajuster ici.
         if (title == "Ménage") {
+          categoryId = 1;
+        } else if (title == "Garde d'enfants") {
+          categoryId = 2; // Exemple d'ID, à vérifier dans votre DB
+        } else if (title == "Coiffure") {
+          categoryId = 3; // Exemple d'ID, à vérifier dans votre DB
+        } else if (title == "Beauté") {
+          categoryId = 4; // Exemple d'ID, à vérifier dans votre DB
+        } else if (title == "Massage") {
+          categoryId = 5; // Exemple d'ID, à vérifier dans votre DB
+        } else if (title == "Coach sportif") {
+          categoryId = 6; // Exemple d'ID, à vérifier dans votre DB
+        }
+
+        if (categoryId != null) {
+          // Si categoryId n'est PAS null, nous pouvons naviguer
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => PrestatorListScreen(categoryId: 1, categoryName: title),
+              builder: (context) => PrestatorListScreen(
+                categoryId: categoryId!, // Utilisation de l'opérateur ! pour affirmer que categoryId n'est pas null
+                categoryName: title,
+              ),
+            ),
+          );
+        } else {
+          // Gérer le cas où la catégorie n'est pas reconnue ou l'ID n'est pas défini
+          print('Catégorie non reconnue ou ID non défini: $title');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Catégorie "$title" non disponible pour l\'instant ou ID inconnu.'),
+              duration: Duration(seconds: 2),
             ),
           );
         }
-        // Ajoutez ici la logique pour les autres catégories
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,

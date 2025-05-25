@@ -20,6 +20,7 @@ public function run(): void
 
 $prestatorUser = User::where('email', 'jean.prestataire@example.com')->first();
 
+
 if ($prestatorUser) {
 
 Prestator::create([

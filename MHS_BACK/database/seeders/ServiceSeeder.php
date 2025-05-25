@@ -19,10 +19,16 @@ class ServiceSeeder extends Seeder
         // Récupérez l'ID de la catégorie "Ménage"
         // Il est plus robuste de le récupérer que de le hardcoder à 1
         $menageCategory = Category::where('name', 'Ménage')->first();
+        $coiffureCategory = Category::where('name', 'Coiffure')->first();
         if (!$menageCategory) {
             $this->command->warn('La catégorie "Ménage" n\'a pas été trouvée. Veuillez exécuter MenageCategorySeeder d\'abord.');
             return;
         }
+        if (!$coiffureCategory) {
+            $this->command->warn('La catégorie "Coiffure" n\'a pas été trouvée. Veuillez exécuter CoiffureCategorySeeder d\'abord.');
+            return;
+        }
+        $coiffureCategoryId = $coiffureCategory->id;
         $menageCategoryId = $menageCategory->id;
 
         // Récupérez les IDs des utilisateurs qui sont des prestataires.
@@ -59,6 +65,15 @@ class ServiceSeeder extends Seeder
                 'service_moment' => Carbon::now()->addDays(rand(1, 30)),
             ]);
         }
+        Service::create([
+                'category_id' => $coiffureCategoryId,
+                'prestator_id' => $prestatorUserIds[array_rand($prestatorUserIds)], // Sélectionne un ID de prestataire aléatoire
+                'customer_id' => $customerUserIds[array_rand($customerUserIds)], // Sélectionne un ID de client aléatoire
+                'name' => 'Coiffure ',
+                'description' => 'Service de ménage standard pour coiffure ' ,
+                'status' => ['pending', 'in_progress', 'completed', 'canceled', 'reported'][array_rand(['pending', 'in_progress', 'completed', 'canceled', 'reported'])],
+                'service_moment' => Carbon::now()->addDays(rand(1, 30)),
+            ]);
 
         // Exemples de services spécifiques avec des IDs réels de prestataires
         $jeanPrestataire = User::where('email', 'jean.prestataire@example.com')->first();
@@ -66,7 +81,7 @@ class ServiceSeeder extends Seeder
 
         if ($jeanPrestataire && $client1) {
             Service::create([
-                'category_id' => $menageCategoryId,
+                'category_id' => $coiffureCategoryId,
                 'prestator_id' => $jeanPrestataire->id,
                 'customer_id' => $client1->id,
                 'name' => 'Ménage approfondi',

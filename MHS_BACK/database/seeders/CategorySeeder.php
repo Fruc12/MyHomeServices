@@ -19,18 +19,21 @@ class CategorySeeder extends Seeder
         ]);
 
         Category::create([
-            'name' => 'Nettoyage régulier',
-            'description' => 'Nettoyage hebdomadaire ou bi-hebdomadaire pour maintenir la propreté de votre domicile.',
+            'name' => 'Garde d\'enfants',
+            'description' => 'Services de garde d\'enfants à domicile, y compris les nourrices et les babysitters.',
+            
         ]);
 
         Category::create([
-            'name' => 'Grand nettoyage',
-            'description' => 'Nettoyage en profondeur de toute la maison, idéal pour le printemps ou après un événement.',
+            'name' => 'Coiffure',
+            'description' => 'Services de coiffure à domicile, y compris les coupes, les colorations et les coiffures spéciales.',
+            
         ]);
 
         Category::create([
-            'name' => 'Nettoyage de vitres',
-            'description' => 'Nettoyage intérieur et extérieur de vos fenêtres et baies vitrées.',
+            'name' => 'Beauté',
+            'description' => 'Services de beauté à domicile, y compris les soins du visage, les manucures et les pédicures.',
+
         ]);
 
         Category::create([
@@ -39,8 +42,15 @@ class CategorySeeder extends Seeder
         ]);
 
         Category::create([
-            'name' => 'Repassage',
-            'description' => 'Service de repassage de votre linge à domicile.',
+            'name' => 'Massage',
+            'description' => 'Services de massage relaxant et thérapeutique à domicile.',
+            
+        ]);
+        Category::create([
+            'name' => 'Coach sportif',
+            'description' => 'Entraînement personnel et coaching sportif à domicile.',
+            
+            
         ]);
     }
 }
