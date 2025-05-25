@@ -20,7 +20,10 @@ return new class extends Migration
             $table->string('name');
             $table->string('description');
             $table->enum('status', ['pending', 'in_progress', 'completed', 'canceled', 'reported']);
-            $table->timestamp('service_moment')->nullable();
+            $table->date('date');
+            $table->time('time');
+            $table->string('location');
+            $table->string('price')->nullable();
 
             $table->foreign('category_id')->references('id')->on('categories')->cascadeOnDelete();
             $table->foreign('prestator_id')->references('id')->on('users')->cascadeOnDelete();

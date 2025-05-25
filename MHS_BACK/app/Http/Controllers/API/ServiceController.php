@@ -4,7 +4,9 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Service;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ServiceController extends Controller
 {
@@ -13,7 +15,16 @@ class ServiceController extends Controller
      */
     public function index()
     {
-        $services = Service::with(['category', 'prestator', 'customer'])->get();
+        if (Auth::user()->role == 'prestator') {
+            $key = 'prestator_id';
+            $value = Auth::user()->prestator->id;
+        } 
+        else {
+            $key = 'customer_id';
+            $value = Auth::id();
+        }
+        // Récupération des services en fonction du rôle de l'utilisateur
+        $services = Service::with(['category', 'prestator', 'customer', 'rate'])->where($key, $value)->get();
         return response()->json([
             'success' => true,
             'message' => 'Liste des services récupérée avec succès.',
@@ -26,6 +37,9 @@ class ServiceController extends Controller
      */
     public function store(Request $request)
     {
+       
+        $request->customer_id = Auth::id();
+        
         $validated = $request->validate([
             'prestator_id' => 'nullable|exists:users,id',
             'customer_id' => 'nullable|exists:users,id',
@@ -33,15 +47,18 @@ class ServiceController extends Controller
             'description' => 'required|string',
             'category_id' => 'required|exists:categories,id',
             'status' => 'required|in:pending,in_progress,completed,canceled,reported',
-            'service_moment' => 'nullable|date'
+            'date' => 'required|date|after:today',
+            'time' => 'required|date_format:H:i,H:i:s',
+            'location' => 'required|string|max:255',
+            'price' => 'nullable|integer|min:0',
         ]);
 
-        // Création du service
+        $validated['date'] = Carbon::createFromDate($request->date)->format('Y-m-d');
         $service = Service::create($validated);
 
         return response()->json([
             'success' => true,
-            'message' => 'Service créée avec succès.',
+            'message' => 'Service créé avec succès.',
             'data' => $service
         ], 201);
     }
@@ -49,20 +66,19 @@ class ServiceController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($service_id)
+    public function show($id)
     {
-        $service = Service::with(['category', 'prestator', 'customer'])->find($service_id);
+        $service = Service::with(['category', 'prestator', 'customer', 'rate'])->find($id);
 
         if (!$service) {
             return response()->json([
-                // 'success' => false,
-                'message' => 'Catégorie non trouvée.'
+                'message' => 'Service non trouvé.'
             ], 404);
         }
-        
+
         return response()->json([
             'success' => true,
-            'message' => 'Catégorie récupérée avec succès.',
+            'message' => 'Service récupéré avec succès.',
             'data' => $service
         ], 200);
     }
@@ -70,7 +86,7 @@ class ServiceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $service_id)
+    public function update(Request $request, $id)
     {
         $validated = $request->validate([
             'prestator_id' => 'nullable|exists:users,id',
@@ -79,11 +95,13 @@ class ServiceController extends Controller
             'description' => 'required|string',
             'category_id' => 'required|exists:categories,id',
             'status' => 'required|in:pending,in_progress,completed,canceled,reported',
-            'service_moment' => 'nullable|date'
+            'date' => 'required|date|after:today',
+            'time' => 'required|date_format:H:i,H:i:s',
+            'location' => 'required|string|max:255',
+            'price' => 'nullable|integer|min:0',
         ]);
 
-        // Création du service
-        $service = Service::find($service_id);
+        $service = Service::find($id);
 
         if (!$service) {
             return response()->json([
@@ -92,11 +110,11 @@ class ServiceController extends Controller
             ], 404);
         }
 
+        $validated['date'] = Carbon::createFromDate($service['date'])->format('Y-m-d');
         $service->update($validated);
-
         return response()->json([
             'success' => true,
-            'message' => 'Service mis a jour avec succès.',
+            'message' => 'Service mis à jour avec succès.',
             'data' => $service
         ], 200);
     }
@@ -104,19 +122,19 @@ class ServiceController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($service_id)
+    public function destroy($id)
     {
-        $services = Service::find($service_id);
+        $service = Service::find($id);
 
-        if (!$services) {
+        if (!$service) {
             return response()->json([
                 // 'success' => false,
                 'message' => 'Service non trouvé.'
             ], 404);
         }
 
-        $services->delete();
-        
+        $service->delete();
+
         return response()->json([
             'success' => true,
             'message' => 'Service supprimé avec succès.'

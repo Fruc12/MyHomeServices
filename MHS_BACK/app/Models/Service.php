@@ -16,7 +16,10 @@ class Service extends Model
         'prestator_id',
         'customer_id',
         'status',
-        'service_moment'
+        'date',
+        'time',
+        'location',
+        'price',
     ];
 
     public function category()

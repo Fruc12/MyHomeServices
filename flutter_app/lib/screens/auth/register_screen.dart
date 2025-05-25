@@ -47,7 +47,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 100), // Espacement au-dessus du logo
 
                   Image.asset(
-                    'assets/icons/logo1.png',
+                    'icons/mhs.png',
                     height: 120, // Ajustez la hauteur selon vos besoins
                   ),
                   const SizedBox(height: 20),

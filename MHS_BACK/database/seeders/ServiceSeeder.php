@@ -62,7 +62,10 @@ class ServiceSeeder extends Seeder
                 'name' => 'Ménage ' . $i,
                 'description' => 'Service de ménage standard pour ménage ' . $i,
                 'status' => ['pending', 'in_progress', 'completed', 'canceled', 'reported'][array_rand(['pending', 'in_progress', 'completed', 'canceled', 'reported'])],
-                'service_moment' => Carbon::now()->addDays(rand(1, 30)),
+                'date' => Carbon::now()->addDays(rand(1, 30)),
+                'time' => Carbon::now()->addMinutes(rand(1, 1440)),
+                'location' => 'Adresse de service ' . $i,
+                'price' => rand(50, 200), // Prix aléatoire entre 50 et 200
             ]);
         }
         Service::create([
@@ -72,7 +75,10 @@ class ServiceSeeder extends Seeder
                 'name' => 'Coiffure ',
                 'description' => 'Service de ménage standard pour coiffure ' ,
                 'status' => ['pending', 'in_progress', 'completed', 'canceled', 'reported'][array_rand(['pending', 'in_progress', 'completed', 'canceled', 'reported'])],
-                'service_moment' => Carbon::now()->addDays(rand(1, 30)),
+                'date' => Carbon::now()->addDays(rand(1, 30)),
+                'time' => Carbon::now()->addMinutes(rand(1,1440)),
+                'location' => 'Adresse de service coiffure',
+                'price' => rand(50, 200), // Prix aléatoire entre 50 et 200
             ]);
 
         // Exemples de services spécifiques avec des IDs réels de prestataires
@@ -87,7 +93,10 @@ class ServiceSeeder extends Seeder
                 'name' => 'Ménage approfondi',
                 'description' => 'Nettoyage complet de la maison avec des produits spécifiques.',
                 'status' => 'completed',
-                'service_moment' => Carbon::now()->subDays(2),
+                'date' => Carbon::now()->subDays(2),
+                'time' => Carbon::now()->subHours(3)->format('H:i:s'),
+                'location' => '123 Rue de Paris, Paris',
+                'price' => 150,
             ]);
         }
     }

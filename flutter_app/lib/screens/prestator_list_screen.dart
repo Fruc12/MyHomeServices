@@ -66,7 +66,7 @@ class _PrestatorListScreenState extends State<PrestatorListScreen> {
         AspectRatio(
           aspectRatio: 16 / 9, // Common aspect ratio for images/videos
           child: Image.asset(
-            'assets/icons/cleaning-woman.jpg',
+            'icons/cleaning-woman.jpg',
             width: double.infinity,
             fit: BoxFit.cover, // Still use cover to fill the AspectRatio box
           ),
