@@ -22,5 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('categories', CategoryController::class);
     Route::apiResource('services', ServiceController::class);
     Route::apiResource('rates', RateController::class);
+   
     // Route::apiResource('documents', DocumentController::class);
 });
+Route::get('/prestators/category/{categoryId}', [PrestatorController::class, 'getPrestatorsByCategory']);

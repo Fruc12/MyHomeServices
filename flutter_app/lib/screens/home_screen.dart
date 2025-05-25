@@ -1,6 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/screens/prestator_list_screen.dart';
+import '/services/auth_service.dart'; // Assurez-vous que le chemin est correct
+import '/services/user_service.dart'; // Assurez-vous que le chemin est correct
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String _userName = ''; // Variable pour stocker le nom de l'utilisateur
+  bool _isLoading = true; // Pour gérer l'état de chargement
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    try {
+      final UserService _userService = UserService();
+      final userData = await _userService.fetchUser();
+      if (userData != null) {
+        setState(() {
+          _userName = userData['name'] ?? 'Utilisateur'; // Récupère le nom, ou 'Utilisateur' par défaut
+        });
+      }
+    } catch (e) {
+      print('Erreur lors du chargement du nom de l\'utilisateur : $e');
+      setState(() {
+        _userName = 'Utilisateur'; // Nom par défaut en cas d'erreur
+      });
+    } finally {
+      setState(() {
+        _isLoading = false; // Le chargement est terminé
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,8 +59,10 @@ class HomeScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: 40),
-                  Text(
-                    "Bonjour Fructueux,",
+                  _isLoading
+                      ? CircularProgressIndicator(color: Colors.white) // Affiche un indicateur de chargement
+                      : Text(
+                    "Salut, $_userName,", // Utilise le nom de l'utilisateur
                     style: TextStyle(fontSize: 18, color: Colors.white),
                   ),
                   SizedBox(height: 5),
@@ -60,7 +100,7 @@ class HomeScreen extends StatelessWidget {
                   SizedBox(height: 20),
                   Text("Nos clients adorent", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   SizedBox(height: 10),
-                  _buildCard("Ménage régulier classique", "À partir de 3 000  FCFA/h", "En savoir plus"),
+                  _buildCard("Ménage régulier classique", "À partir de 3 000 FCFA/h", "En savoir plus"),
                   SizedBox(height: 20),
                   Text("Faites-nous confiance", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   _buildTrustSection("Réservation simple et sécurisée", "Découvrez le mode d'emploi"),
@@ -76,8 +116,48 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildServiceButton(String title, IconData icon) {
-    return SizedBox(
-      width: 100,
+    return InkWell(
+      onTap: () {
+        int? categoryId; // Variable pour stocker l'ID de la catégorie (peut être null initialement)
+
+        // IMPORTANT: Assurez-vous que ces IDs correspondent aux IDs réels de vos catégories dans la base de données Laravel.
+        // Si vos IDs sont différents, vous devrez les ajuster ici.
+        if (title == "Ménage") {
+          categoryId = 1;
+        } else if (title == "Garde d'enfants") {
+          categoryId = 2; // Exemple d'ID, à vérifier dans votre DB
+        } else if (title == "Coiffure") {
+          categoryId = 3; // Exemple d'ID, à vérifier dans votre DB
+        } else if (title == "Beauté") {
+          categoryId = 4; // Exemple d'ID, à vérifier dans votre DB
+        } else if (title == "Massage") {
+          categoryId = 5; // Exemple d'ID, à vérifier dans votre DB
+        } else if (title == "Coach sportif") {
+          categoryId = 6; // Exemple d'ID, à vérifier dans votre DB
+        }
+
+        if (categoryId != null) {
+          // Si categoryId n'est PAS null, nous pouvons naviguer
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PrestatorListScreen(
+                categoryId: categoryId!, // Utilisation de l'opérateur ! pour affirmer que categoryId n'est pas null
+                categoryName: title,
+              ),
+            ),
+          );
+        } else {
+          // Gérer le cas où la catégorie n'est pas reconnue ou l'ID n'est pas défini
+          print('Catégorie non reconnue ou ID non défini: $title');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Catégorie "$title" non disponible pour l\'instant ou ID inconnu.'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      },
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
