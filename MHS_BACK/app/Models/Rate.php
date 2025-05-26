@@ -10,13 +10,13 @@ class Rate extends Model
     use HasFactory;
 
     protected $fillable = [
-        'service_id',
+        'reservation_id',
         'comment',
         'rating',
     ];
 
-    public function service()
+    public function reservation()
     {
-        return $this->belongsTo(Service::class);
+        return $this->belongsTo(Reservation::class);
     }
 }

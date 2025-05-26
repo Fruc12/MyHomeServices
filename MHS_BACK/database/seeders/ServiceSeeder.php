@@ -40,63 +40,38 @@ class ServiceSeeder extends Seeder
         $prestatorUserIds = User::where('role', 'prestator')->pluck('id')->toArray();
 
 
-        // Récupérez les IDs des utilisateurs qui sont des clients
-        $customerUserIds = User::where('role', 'customer')->pluck('id')->toArray();
-
         // Assurez-vous d'avoir au moins un prestataire et un client
         if (empty($prestatorUserIds)) {
             $this->command->warn('Aucun utilisateur prestataire trouvé. Veuillez exécuter UserSeeder et PrestatorSeeder d\'abord.');
             return;
         }
-        if (empty($customerUserIds)) {
-            $this->command->warn('Aucun utilisateur client trouvé. Veuillez exécuter UserSeeder d\'abord.');
-            return;
-        }
+
 
         // Créer des services de ménage pour différents prestataires et clients
         for ($i = 1; $i <= 5; $i++) {
             Service::create([
-                'category_id' => $menageCategoryId,
+                'category_id' => $coiffureCategoryId,
                 'prestator_id' => $prestatorUserIds[array_rand($prestatorUserIds)], // Sélectionne un ID de prestataire aléatoire
-                'customer_id' => $customerUserIds[array_rand($customerUserIds)], // Sélectionne un ID de client aléatoire
                 'name' => 'Ménage ' . $i,
                 'description' => 'Service de ménage standard pour ménage ' . $i,
-                'status' => ['pending', 'in_progress', 'completed', 'canceled', 'reported'][array_rand(['pending', 'in_progress', 'completed', 'canceled', 'reported'])],
-                'date' => Carbon::now()->addDays(rand(1, 30)),
-                'time' => Carbon::now()->addMinutes(rand(1, 1440)),
-                'location' => 'Adresse de service ' . $i,
-                'price' => rand(50, 200), // Prix aléatoire entre 50 et 200
             ]);
         }
         Service::create([
                 'category_id' => $coiffureCategoryId,
                 'prestator_id' => $prestatorUserIds[array_rand($prestatorUserIds)], // Sélectionne un ID de prestataire aléatoire
-                'customer_id' => $customerUserIds[array_rand($customerUserIds)], // Sélectionne un ID de client aléatoire
                 'name' => 'Coiffure ',
                 'description' => 'Service de ménage standard pour coiffure ' ,
-                'status' => ['pending', 'in_progress', 'completed', 'canceled', 'reported'][array_rand(['pending', 'in_progress', 'completed', 'canceled', 'reported'])],
-                'date' => Carbon::now()->addDays(rand(1, 30)),
-                'time' => Carbon::now()->addMinutes(rand(1,1440)),
-                'location' => 'Adresse de service coiffure',
-                'price' => rand(50, 200), // Prix aléatoire entre 50 et 200
             ]);
 
         // Exemples de services spécifiques avec des IDs réels de prestataires
         $jeanPrestataire = User::where('email', 'jean.prestataire@example.com')->first();
-        $client1 = User::where('email', 'client1@example.com')->first();
 
-        if ($jeanPrestataire && $client1) {
+        if ($jeanPrestataire) {
             Service::create([
                 'category_id' => $coiffureCategoryId,
                 'prestator_id' => $jeanPrestataire->id,
-                'customer_id' => $client1->id,
                 'name' => 'Ménage approfondi',
                 'description' => 'Nettoyage complet de la maison avec des produits spécifiques.',
-                'status' => 'completed',
-                'date' => Carbon::now()->subDays(2),
-                'time' => Carbon::now()->subHours(3)->format('H:i:s'),
-                'location' => '123 Rue de Paris, Paris',
-                'price' => 150,
             ]);
         }
     }

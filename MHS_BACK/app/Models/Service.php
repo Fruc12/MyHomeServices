@@ -14,12 +14,6 @@ class Service extends Model
         'description',
         'category_id',
         'prestator_id',
-        'customer_id',
-        'status',
-        'date',
-        'time',
-        'location',
-        'price',
     ];
 
     public function category()
@@ -32,13 +26,8 @@ class Service extends Model
         return $this->belongsTo(User::class, 'prestator_id');
     }
 
-    public function customer()
+    public function reservations()
     {
-        return $this->belongsTo(User::class, 'customer_id');
-    }
-
-    public function rate()
-    {
-        return $this->hasOne(Rate::class);
+        return $this->hasMany(Reservation::class);
     }
 }

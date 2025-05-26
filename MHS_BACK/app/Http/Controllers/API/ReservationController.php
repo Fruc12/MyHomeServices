@@ -3,19 +3,24 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Reservation;
 use App\Models\Service;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
-class ServiceController extends Controller
+class ReservationController extends Controller
 {
-    /**
+        /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Service $service)
     {
-        //
+        // Récupération des services en fonction du rôle de l'utilisateur
+        $reservations = $service->reservations->with(['customer', 'prestator'])->get();
+        return response()->json([
+            'success' => true,
+            'message' => 'Liste des services récupérée avec succès.',
+            'data' => $services
+        ], 200);
     }
 
     /**
@@ -28,9 +33,15 @@ class ServiceController extends Controller
         
         $validated = $request->validate([
             'prestator_id' => 'nullable|exists:users,id',
+            'customer_id' => 'nullable|exists:users,id',
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'category_id' => 'required|exists:categories,id',
+            'status' => 'required|in:pending,in_progress,completed,canceled,reported',
+            'date' => 'required|date|after:today',
+            'time' => 'required|date_format:H:i,H:i:s',
+            'location' => 'required|string|max:255',
+            'price' => 'nullable|integer|min:0',
         ]);
 
         $validated['date'] = Carbon::createFromDate($request->date)->format('Y-m-d');
@@ -48,7 +59,7 @@ class ServiceController extends Controller
      */
     public function show($id)
     {
-        $service = Service::with(['category', 'prestator'])->find($id);
+        $service = Service::with(['category', 'prestator', 'customer', 'rate'])->find($id);
 
         if (!$service) {
             return response()->json([
@@ -70,9 +81,15 @@ class ServiceController extends Controller
     {
         $validated = $request->validate([
             'prestator_id' => 'nullable|exists:users,id',
+            'customer_id' => 'nullable|exists:users,id',
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'category_id' => 'required|exists:categories,id',
+            'status' => 'required|in:pending,in_progress,completed,canceled,reported',
+            'date' => 'required|date|after:today',
+            'time' => 'required|date_format:H:i,H:i:s',
+            'location' => 'required|string|max:255',
+            'price' => 'nullable|integer|min:0',
         ]);
 
         $service = Service::find($id);

@@ -57,9 +57,9 @@ class User extends Authenticatable
         return $this->hasMany(Service::class, 'prestator_id');
     }
 
-    public function services()
+    public function reservations()
     {
-        return $this->hasMany(Service::class, 'customer_id');
+        return $this->hasMany(Reservation::class, 'customer_id');
     }
 
     public function prestator()

@@ -113,4 +113,14 @@ class CategoryController extends Controller
             'message' => 'Catégorie supprimée avec succès.'
         ], 200);
     }
+
+    public function getCategoryServices($category) {
+        $services = Category::findOrFail($category)->services->load(['prestator', 'category']);
+        // Récupération des services en fonction du rôle de l'utilisateur
+        return response()->json([
+            'success' => true,
+            'message' => 'Liste des services récupérée avec succès.',
+            'data' => $services
+        ], 200);
+    }
 }

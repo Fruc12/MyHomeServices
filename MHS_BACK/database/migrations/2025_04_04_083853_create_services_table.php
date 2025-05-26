@@ -14,16 +14,10 @@ return new class extends Migration
         Schema::create('services', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('category_id')->index();
-            $table->unsignedBigInteger('prestator_id')->nullable()->index();
-            $table->unsignedBigInteger('customer_id')->nullable()->index();
+            $table->unsignedBigInteger('prestator_id')->index();
 
-            $table->string('name');
+            $table->string('name'); 
             $table->string('description');
-            $table->enum('status', ['pending', 'in_progress', 'completed', 'canceled', 'reported']);
-            $table->date('date');
-            $table->time('time');
-            $table->string('location');
-            $table->string('price')->nullable();
 
             $table->foreign('category_id')->references('id')->on('categories')->cascadeOnDelete();
             $table->foreign('prestator_id')->references('id')->on('users')->cascadeOnDelete();
