@@ -39,6 +39,8 @@ dependencies:
   shared_preferences: ^2.0.8
 #  geolocator: ^13.0.4
   flutter_secure_storage: ^9.2.4
+  intl: ^0.18.1
+
 
 
 dev_dependencies:
@@ -78,6 +80,10 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/
+    - assets/icons/hair-stylist.jpg
+    - assets/icons/massage-therapist.jpg
+    - assets/icons/sport-coach.jpg
+    - assets/icons/beauty-service.jpg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
