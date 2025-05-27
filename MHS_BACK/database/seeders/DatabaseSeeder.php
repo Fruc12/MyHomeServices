@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             PrestatorSeeder::class,
             DocumentSeeder::class,
             ServiceSeeder::class,
+            ReservationSeeder::class,
         ]);
         // User::factory(10)->create();
 

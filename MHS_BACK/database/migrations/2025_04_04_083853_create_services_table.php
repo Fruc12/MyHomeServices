@@ -21,7 +21,6 @@ return new class extends Migration
 
             $table->foreign('category_id')->references('id')->on('categories')->cascadeOnDelete();
             $table->foreign('prestator_id')->references('id')->on('users')->cascadeOnDelete();
-            $table->foreign('customer_id')->references('id')->on('users')->cascadeOnDelete();
 
             $table->timestamps();
         });

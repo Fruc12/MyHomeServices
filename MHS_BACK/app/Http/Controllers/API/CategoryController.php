@@ -114,8 +114,8 @@ class CategoryController extends Controller
         ], 200);
     }
 
-    public function getCategoryServices($category) {
-        $services = Category::findOrFail($category)->services->load(['prestator', 'category']);
+    public function getCategoryServices(Category $category) {
+        $services = $category->services->load(['prestator']);
         // Récupération des services en fonction du rôle de l'utilisateur
         return response()->json([
             'success' => true,

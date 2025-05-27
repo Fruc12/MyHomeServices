@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'http_service.dart';
 
 class UserService {
-  final String _baseUrl = 'http://localhost:8000/api/'; // à adapter
+  final String _baseUrl = HttpService.getBaseUrl(); // à adapter
   final storage = const FlutterSecureStorage();
 
   Future<Map<String, dynamic>?> fetchUser() async {

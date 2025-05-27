@@ -50,18 +50,12 @@ class ServiceSeeder extends Seeder
         // Créer des services de ménage pour différents prestataires et clients
         for ($i = 1; $i <= 5; $i++) {
             Service::create([
-                'category_id' => $coiffureCategoryId,
+                'category_id' => $i,
                 'prestator_id' => $prestatorUserIds[array_rand($prestatorUserIds)], // Sélectionne un ID de prestataire aléatoire
                 'name' => 'Ménage ' . $i,
                 'description' => 'Service de ménage standard pour ménage ' . $i,
             ]);
         }
-        Service::create([
-                'category_id' => $coiffureCategoryId,
-                'prestator_id' => $prestatorUserIds[array_rand($prestatorUserIds)], // Sélectionne un ID de prestataire aléatoire
-                'name' => 'Coiffure ',
-                'description' => 'Service de ménage standard pour coiffure ' ,
-            ]);
 
         // Exemples de services spécifiques avec des IDs réels de prestataires
         $jeanPrestataire = User::where('email', 'jean.prestataire@example.com')->first();
