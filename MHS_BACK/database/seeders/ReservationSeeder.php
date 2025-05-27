@@ -24,7 +24,7 @@ class ReservationSeeder extends Seeder
         }
 
 
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 6; $i++) {
             Reservation::create([
                 'service_id' => $i,
                 'customer_id' => $customerUserIds[array_rand($customerUserIds)], // Sélectionne un ID de client aléatoire

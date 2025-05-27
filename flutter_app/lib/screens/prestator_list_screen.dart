@@ -223,9 +223,9 @@ class _PrestatorListScreenState extends State<PrestatorListScreen> {
               style: const TextStyle(fontSize: 15, color: Colors.black87),
             ),
             const SizedBox(height: 8),
-            if (service['prestator']['prestator'] != null)
+            // if (service['prestator']['address'] != null)
               Text(
-                "📍 ${service['prestator']['prestator']['address']}",
+                "📍 ${service['prestator']['address']}",
                 style: const TextStyle(fontSize: 14, color: Colors.black54),
               ),
             const SizedBox(height: 4),

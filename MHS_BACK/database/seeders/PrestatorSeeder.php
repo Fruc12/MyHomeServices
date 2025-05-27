@@ -26,37 +26,38 @@ class PrestatorSeeder extends Seeder
         }
 
         $prestatorUser = User::where('email', 'fruc.prestataire@example.com')->first();
+
         if ($prestatorUser) {
             Prestator::create([
-            'user_id' => $prestatorUser->id,
-            'description' => 'Plombier professionnel avec 8 ans d\'expérience. Spécialisé dans les réparations d\'urgence.',
-            'validate' => true,
-            'path' => 'prestators/documents/',
-            'address' => '789 Boulevard des Plombiers, 75003 Paris',
-        ]);
-    }
+                'user_id' => $prestatorUser->id,
+                'description' => 'Plombier professionnel avec 8 ans d\'expérience. Spécialisé dans les réparations d\'urgence.',
+                'validate' => true,
+                'path' => 'prestators/documents/',
+                'address' => '789 Boulevard des Plombiers, 75003 Paris',
+            ]);
+        }
 
+        $prestatorUser = User::where('email', 'steven.prestataire@example.com')->first();
 
-    $prestatorUser = User::where('email', 'steven.prestataire@example.com')->first();
+        if ($prestatorUser) {
+            Prestator::create([
+                'user_id' => $prestatorUser->id,
+                'description' => 'Électricien qualifié avec 10 ans d\'expérience. Disponible pour des travaux résidentiels et commerciaux.',
+                'validate' => false,
+                'path' => 'prestators/documents/',
+                'address' => '456 Avenue des Électriciens, 75002 Paris',
+            ]);
+        }
 
-    if ($prestatorUser) {
-
-    Prestator::create([
-
-    'user_id' => $prestatorUser->id,
-
-    'description' => 'Électricien qualifié avec 10 ans d\'expérience. Disponible pour des travaux résidentiels et commerciaux.',
-
-    'validate' => false,
-
-    'path' => 'prestators/documents/',
-
-    'address' => '456 Avenue des Électriciens, 75002 Paris',
-
-    ]);
-
-    }
-
+        if ($prestatorUser) {
+            Prestator::create([
+                'user_id' => $prestatorUser->id,
+                'description' => 'Électricien qualifié avec 10 ans d\'expérience. Disponible pour des travaux résidentiels et commerciaux.',
+                'validate' => false,
+                'path' => 'prestators/documents/',
+                'address' => '456 Avenue des Électriciens, 75002 Paris',
+            ]);
+        }
     }
 
 }

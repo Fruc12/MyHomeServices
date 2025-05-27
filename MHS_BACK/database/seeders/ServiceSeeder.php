@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use App\Models\Service;
 use App\Models\User; // N'oubliez pas d'importer le modèle User
 use App\Models\Category; // N'oubliez pas d'importer le modèle Category
+use App\Models\Prestator;
 use Carbon\Carbon;
 
 class ServiceSeeder extends Seeder
@@ -37,7 +38,7 @@ class ServiceSeeder extends Seeder
         // Si vous avez un modèle Prestator qui a une relation avec User, c'est encore mieux.
         // Si Prestator::all()->pluck('user_id')->toArray();
         // OU si vous utilisez le rôle 'prestator' dans UserSeeder et que ces IDs correspondent aux entrées de 'prestators':
-        $prestatorUserIds = User::where('role', 'prestator')->pluck('id')->toArray();
+        $prestatorUserIds = Prestator::pluck('id')->toArray();
 
 
         // Assurez-vous d'avoir au moins un prestataire et un client
@@ -48,7 +49,7 @@ class ServiceSeeder extends Seeder
 
 
         // Créer des services de ménage pour différents prestataires et clients
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 6; $i++) {
             Service::create([
                 'category_id' => $i,
                 'prestator_id' => $prestatorUserIds[array_rand($prestatorUserIds)], // Sélectionne un ID de prestataire aléatoire
