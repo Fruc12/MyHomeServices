@@ -4,6 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Prestator;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -114,8 +116,10 @@ class CategoryController extends Controller
         ], 200);
     }
 
-    public function getCategoryServices($category) {
-        $services = Category::findOrFail($category)->services->load(['prestator', 'category']);
+    public function getCategoryServices(Category $category) {
+        $services = $category->services->load(['prestator.user']);
+
+        // return Prestator::with('user')->find(3)->toArray();
         // Récupération des services en fonction du rôle de l'utilisateur
         return response()->json([
             'success' => true,

@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'http_service.dart';
 
 class AuthService {
-  static const String apiUrl = 'http://localhost:8000/api/';
+  final String apiUrl = HttpService.getBaseUrl(); // à adapter
 
   // Inscription
   Future<bool> register(String name, String email, String password, String role) async {

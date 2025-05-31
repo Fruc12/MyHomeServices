@@ -27,10 +27,10 @@ class ServiceController extends Controller
         $request->customer_id = Auth::id();
         
         $validated = $request->validate([
-            'prestator_id' => 'nullable|exists:users,id',
+            'prestator_id' => 'required|exists:users,id',
+            'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
         ]);
 
         $validated['date'] = Carbon::createFromDate($request->date)->format('Y-m-d');
@@ -69,10 +69,10 @@ class ServiceController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'prestator_id' => 'nullable|exists:users,id',
+            'prestator_id' => 'required|exists:users,id',
+            'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
         ]);
 
         $service = Service::find($id);

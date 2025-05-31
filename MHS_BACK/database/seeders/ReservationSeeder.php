@@ -24,14 +24,14 @@ class ReservationSeeder extends Seeder
         }
 
 
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 6; $i++) {
             Reservation::create([
                 'service_id' => $i,
                 'customer_id' => $customerUserIds[array_rand($customerUserIds)], // Sélectionne un ID de client aléatoire
                 'status' => ['pending', 'in_progress', 'completed', 'canceled', 'reported'][array_rand(['pending', 'in_progress', 'completed', 'canceled', 'reported'])],
                 'date' => Carbon::now()->addDays(rand(1, 30)),
                 'time' => Carbon::now()->addMinutes(rand(1, 1440)),
-                'location' => '123 Main St, Cityville' + $i,
+                'location' => '123 Main St, Cityville' . $i,
                 'price' => rand(50, 200), // Prix aléatoire entre 50 et 200
             ]);
         }
@@ -45,21 +45,16 @@ class ReservationSeeder extends Seeder
             'price' => rand(50, 200), // Prix aléatoire entre 50 et 200
             
         ]);
-
-        // Exemples de services spécifiques avec des IDs réels de prestataires
-        $client1 = User::where('email', 'client1@example.com')->first();
-
-        if ($client1) {
-            Reservation::create([
-                'service_id' => 3,
-                'customer_id' => $client1->id,
-                'status' => 'completed',
-                'status' => 'completed',
-                'date' => Carbon::now()->subDays(2),
-                'time' => Carbon::now()->subHours(3)->format('H:i:s'),
-                'location' => '123 Rue de Paris, Paris',
-                'price' => 150,
-            ]);
-        }
+        
+        Reservation::create([
+            'service_id' => 3,
+            'customer_id' => 3,
+            'status' => 'completed',
+            'status' => 'completed',
+            'date' => Carbon::now()->subDays(2),
+            'time' => Carbon::now()->subHours(3)->format('H:i:s'),
+            'location' => '123 Rue de Paris, Paris',
+            'price' => 150,
+        ]);
     }
 }

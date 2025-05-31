@@ -6,20 +6,39 @@ use App\Http\Controllers\Controller;
 use App\Models\Reservation;
 use App\Models\Service;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class ReservationController extends Controller
 {
         /**
      * Display a listing of the resource.
      */
-    public function index(Service $service)
-    {
+    public function index(string $role) {
+        if ($role == 'customer') {
+            $reservations = Reservation::with(['service.prestator', 'service.category'])->where('customer_id', Auth::id())->get();
+        }
+        else if ($role == 'prestator') {
+            if ( Auth::user()->role == 'customer') {
+                return response()->json([
+                    // 'success' => false,
+                    'message' => 'Seul un prestataire peut voir les reservations de role prestator.'
+                ], 403);
+            }
+            $reservations = Reservation::with(['customer', 'service.category'])->whereHas('service', function ($query) {
+                $query->where('prestator_id', Auth::id());
+            })->get();
+        } else {
+            return response()->json([
+                // 'success' => false,
+                'message' => 'Le rôle doit etre customer ou prestataire.'
+            ], 400);
+        }
         // Récupération des services en fonction du rôle de l'utilisateur
-        $reservations = $service->reservations->with(['customer', 'prestator'])->get();
         return response()->json([
             'success' => true,
             'message' => 'Liste des services récupérée avec succès.',
-            'data' => $services
+            'data' => $reservations
         ], 200);
     }
 
@@ -32,11 +51,8 @@ class ReservationController extends Controller
         $request->customer_id = Auth::id();
         
         $validated = $request->validate([
-            'prestator_id' => 'nullable|exists:users,id',
+            'service_id' => 'required|exists:services,id',
             'customer_id' => 'nullable|exists:users,id',
-            'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
             'status' => 'required|in:pending,in_progress,completed,canceled,reported',
             'date' => 'required|date|after:today',
             'time' => 'required|date_format:H:i,H:i:s',
@@ -45,46 +61,38 @@ class ReservationController extends Controller
         ]);
 
         $validated['date'] = Carbon::createFromDate($request->date)->format('Y-m-d');
-        $service = Service::create($validated);
+        $validated['time'] = Carbon::createFromDate($request->tome)->format('H:i');
+        $reservation = Service::create($validated);
 
         return response()->json([
             'success' => true,
             'message' => 'Service créé avec succès.',
-            'data' => $service
+            'data' => $reservation
         ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show(Reservation $reservation)
     {
-        $service = Service::with(['category', 'prestator', 'customer', 'rate'])->find($id);
-
-        if (!$service) {
-            return response()->json([
-                'message' => 'Service non trouvé.'
-            ], 404);
-        }
+        $reservation = $reservation->load(['service.prestator', 'service.category', 'customer', 'rate']);
 
         return response()->json([
             'success' => true,
             'message' => 'Service récupéré avec succès.',
-            'data' => $service
+            'data' => $reservation
         ], 200);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Reservation $reservation)
     {
         $validated = $request->validate([
-            'prestator_id' => 'nullable|exists:users,id',
+            'service_id' => 'required|exists:services,id',
             'customer_id' => 'nullable|exists:users,id',
-            'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
             'status' => 'required|in:pending,in_progress,completed,canceled,reported',
             'date' => 'required|date|after:today',
             'time' => 'required|date_format:H:i,H:i:s',
@@ -92,39 +100,24 @@ class ReservationController extends Controller
             'price' => 'nullable|integer|min:0',
         ]);
 
-        $service = Service::find($id);
+        $validated['date'] = Carbon::createFromDate($request->date)->format('Y-m-d');
+        $validated['time'] = Carbon::createFromDate($request->tome)->format('H:i');
 
-        if (!$service) {
-            return response()->json([
-                // 'success' => false,
-                'message' => 'Service non trouvé.'
-            ], 404);
-        }
+        $reservation->update($validated);
 
-        $validated['date'] = Carbon::createFromDate($service['date'])->format('Y-m-d');
-        $service->update($validated);
         return response()->json([
             'success' => true,
             'message' => 'Service mis à jour avec succès.',
-            'data' => $service
+            'data' => $reservation
         ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(Reservation $reservation)
     {
-        $service = Service::find($id);
-
-        if (!$service) {
-            return response()->json([
-                // 'success' => false,
-                'message' => 'Service non trouvé.'
-            ], 404);
-        }
-
-        $service->delete();
+        $reservation->delete();
 
         return response()->json([
             'success' => true,

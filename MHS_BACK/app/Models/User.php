@@ -52,10 +52,10 @@ class User extends Authenticatable
         ];
     }
 
-    public function prestations()
-    {
-        return $this->hasMany(Service::class, 'prestator_id');
-    }
+    // public function prestations()
+    // {
+    //     return $this->hasMany(Service::class, 'prestator_id');
+    // }
 
     public function reservations()
     {

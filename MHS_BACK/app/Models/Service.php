@@ -23,7 +23,7 @@ class Service extends Model
 
     public function prestator()
     {
-        return $this->belongsTo(User::class, 'prestator_id');
+        return $this->belongsTo(Prestator::class);
     }
 
     public function reservations()
