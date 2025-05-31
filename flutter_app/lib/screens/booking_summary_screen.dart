@@ -1,3 +1,4 @@
+// lib/screens/booking_summary_screen.dart
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -6,7 +7,7 @@ import 'package:intl/intl.dart';
 class BookingSummaryScreen extends StatefulWidget {
   final Map<String, dynamic> prestator;
   final String address;
-  final String phoneNumber;
+  final String phoneNumber; // Nous ne l'enverrons pas dans la réservation, mais laissons-le ici pour l'affichage
   final DateTime selectedDate;
   final TimeOfDay selectedTime;
 
@@ -41,20 +42,23 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
       widget.selectedTime.minute,
     );
 
-    final String apiUrl = 'http://localhost:8000/api/bookings';
+    final String baseUrl = 'http://localhost:8000';
+    final String apiUrl = '$baseUrl/api/reservations/customer'; // Endpoint pour créer une réservation
+    Map<String, dynamic> requestBody = {
+      'service_id': widget.prestator['id'], // Assurez-vous que c'est bien l'ID du service
+      'customer_id': 1, // Temporaire: Remplacez par l'ID de l'utilisateur connecté
+      'location': widget.address,
+      'date': DateFormat('yyyy-MM-dd').format(bookingDateTime),
+      'time': DateFormat('HH:mm:ss').format(bookingDateTime),
+      'status': 'pending',
+
+    };
 
     try {
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'prestator_id': widget.prestator['id'],
-          'client_id': 1, // Assuming a fixed client_id for now
-          'address': widget.address,
-          'phone_number': widget.phoneNumber,
-          'booking_time': bookingDateTime.toIso8601String(),
-          'status': 'pending',
-        }),
+        body: json.encode(requestBody),
       );
 
       if (response.statusCode == 201) {
@@ -67,11 +71,13 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
         setState(() {
           _message = 'Échec de la réservation : ${errorData['message'] ?? 'Erreur inconnue'}';
         });
+        print('Erreur API: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
       setState(() {
         _message = 'Erreur de connexion : $e';
       });
+      print('Erreur de connexion: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -106,7 +112,6 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
             onPressed: () {
               Navigator.of(context).pop(); // Close the dialog
               Navigator.of(context).pop(); // Go back to BookingFormScreen
-              Navigator.of(context).pop(); // Go back to previous screen (e.g., prestator detail)
             },
           ),
         ],
@@ -132,10 +137,10 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                 ),
                 borderRadius: BorderRadius.vertical(bottom: Radius.circular(40)),
               ),
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'RÉCAPITULATIF',
                     style: TextStyle(
                       color: Colors.white,
@@ -146,7 +151,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                   ),
                   CircleAvatar(
                     backgroundColor: Colors.orange,
-                    child: const Icon(Icons.check_circle_outline, color: Colors.white),
+                    child: Icon(Icons.check_circle_outline, color: Colors.white),
                   ),
                 ],
               ),
@@ -180,7 +185,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                       const Divider(),
                       _buildSummaryRow('Adresse', widget.address, Icons.location_on),
                       const Divider(),
-                      _buildSummaryRow('Téléphone', widget.phoneNumber, Icons.phone),
+                      _buildSummaryRow('Téléphone', widget.phoneNumber, Icons.phone), // Le téléphone reste affiché pour l'utilisateur
                       const Divider(),
                       _buildSummaryRow('Date', DateFormat('dd/MM/yyyy').format(widget.selectedDate), Icons.calendar_today),
                       const Divider(),
@@ -207,7 +212,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
-                          minimumSize: const Size.fromHeight(50), // Make button full width
+                          minimumSize: const Size.fromHeight(50),
                         ),
                         child: _isLoading
                             ? const SizedBox(
@@ -237,7 +242,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
-                          minimumSize: const Size.fromHeight(50), // Make button full width
+                          minimumSize: const Size.fromHeight(50),
                         ),
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
