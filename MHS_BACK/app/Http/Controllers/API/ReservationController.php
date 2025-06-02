@@ -62,7 +62,7 @@ class ReservationController extends Controller
 
         $validated['date'] = Carbon::createFromDate($request->date)->format('Y-m-d');
         $validated['time'] = Carbon::createFromDate($request->tome)->format('H:i');
-        $reservation = Service::create($validated);
+        $reservation = Reservation::create($validated);
 
         return response()->json([
             'success' => true,
