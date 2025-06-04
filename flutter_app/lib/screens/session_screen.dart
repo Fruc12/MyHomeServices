@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
-// import 'package:flutter_dotenv/flutter_dotenv.dart'; // N'importez plus dotenv
-import 'package:flutter_app/services/auth_service.dart'; // Importez AuthService
+import 'package:flutter_app/services/auth_service.dart';
 
 class SessionsScreen extends StatefulWidget {
   const SessionsScreen({Key? key}) : super(key: key);
@@ -14,17 +13,20 @@ class SessionsScreen extends StatefulWidget {
 }
 
 class _SessionsScreenState extends State<SessionsScreen> {
-  List<dynamic> upcomingReservations = [];
+  List<dynamic> _allReservations = []; // Pour stocker toutes les réservations
+  List<dynamic> _upcomingReservations = [];
+  List<dynamic> _completedReservations = [];
+  List<dynamic> _canceledReservations = [];
   bool isLoading = true;
   String errorMessage = '';
 
   @override
   void initState() {
     super.initState();
-    _fetchUpcomingReservations();
+    _fetchReservations(); // Appel initial pour charger les données
   }
 
-  Future<void> _fetchUpcomingReservations() async {
+  Future<void> _fetchReservations() async {
     setState(() {
       isLoading = true;
       errorMessage = '';
@@ -32,7 +34,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
 
     try {
       final String? authToken = await AuthService().getToken();
-      final int? userId = await AuthService().getUserId(); // Utilise la nouvelle méthode getUserId()
+      final int? userId = await AuthService().getUserId();
 
       if (authToken == null || userId == null) {
         setState(() {
@@ -42,75 +44,88 @@ class _SessionsScreenState extends State<SessionsScreen> {
         return;
       }
 
-      // Remplacement de dotenv par l'URL localhost directe
       final String baseUrl = 'http://localhost:8000';
+      // L'API renvoie des réservations pour 'customer' ou 'prestator'.
+      // Ici, nous supposons que l'utilisateur est un 'customer'.
+      // Vous devrez ajuster si l'utilisateur peut être un prestataire.
       final String apiUrl = '$baseUrl/api/reservations/customer';
 
       final response = await http.get(
         Uri.parse(apiUrl),
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
           'Authorization': 'Bearer $authToken',
+          'Accept': 'application/json',
         },
       );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
-        if (responseData.containsKey('reservations')) {
-          List<dynamic> allReservations = responseData['reservations'];
 
-          // Filtrer les réservations pour "À venir" (pending, in_progress)
-          upcomingReservations = allReservations.where((reservation) {
-            final String status = reservation['status'];
-            return status == 'pending' || status == 'in_progress';
-          }).toList();
-
-          setState(() {
-            isLoading = false;
-          });
+        // *** CORRECTION ICI : Utilisation de la clé "data" ***
+        if (responseData.containsKey('data') && responseData['data'] is List) {
+          _allReservations = responseData['data'];
+          _filterReservations(); // Filtrer les réservations après les avoir chargées
         } else {
-          setState(() {
-            errorMessage = 'Réponse API invalide : Clé "reservations" manquante.';
-            isLoading = false;
-          });
+          errorMessage = 'Réponse API invalide : la clé "data" est manquante ou n\'est pas une liste.';
         }
       } else {
-        setState(() {
-          errorMessage = 'Échec du chargement des sessions : ${response.statusCode} - ${response.body}';
-          isLoading = false;
-        });
-        print('Erreur API Sessions: ${response.statusCode} - ${response.body}');
+        errorMessage = 'Échec du chargement des sessions: ${response.statusCode}';
       }
     } catch (e) {
+      errorMessage = 'Erreur de connexion : $e';
+    } finally {
       setState(() {
-        errorMessage = 'Erreur de connexion : $e';
         isLoading = false;
       });
-      print('Erreur de connexion Sessions: $e');
     }
   }
 
-  String _formatDateTime(String date, String time) {
-    try {
-      final dateTime = DateTime.parse('$date $time');
-      return DateFormat('dd/MM/yyyy à HH:mm').format(dateTime);
-    } catch (e) {
-      return '$date à $time';
+  void _filterReservations() {
+    final now = DateTime.now();
+    _upcomingReservations.clear();
+    _completedReservations.clear();
+    _canceledReservations.clear();
+
+    for (var reservation in _allReservations) {
+      // Parse la date et l'heure de la réservation
+      final reservationDate = DateTime.parse(reservation['date']);
+      final reservationTimeParts = reservation['time'].split(':');
+      final reservationTime = TimeOfDay(
+        hour: int.parse(reservationTimeParts[0]),
+        minute: int.parse(reservationTimeParts[1]),
+      );
+
+      final reservationDateTime = DateTime(
+        reservationDate.year,
+        reservationDate.month,
+        reservationDate.day,
+        reservationTime.hour,
+        reservationTime.minute,
+      );
+
+      final status = reservation['status'];
+
+      if (status == 'canceled') {
+        _canceledReservations.add(reservation);
+      } else if (reservationDateTime.isAfter(now)) {
+        _upcomingReservations.add(reservation);
+      } else {
+        _completedReservations.add(reservation);
+      }
     }
   }
 
   Color _getStatusColor(String status) {
     switch (status) {
       case 'pending':
-        return Colors.orange;
+        return Colors.orange; // Orange pour "en attente" ou "à venir"
       case 'in_progress':
         return Colors.blue;
       case 'completed':
         return Colors.green;
       case 'canceled':
         return Colors.red;
-      case 'reported':
+      case 'reported': // Si vous avez un statut "signalé"
         return Colors.purple;
       default:
         return Colors.grey;
@@ -136,54 +151,63 @@ class _SessionsScreenState extends State<SessionsScreen> {
             ],
           ),
         ),
-        body: TabBarView(
+        body: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : errorMessage.isNotEmpty
+            ? Center(child: Text(errorMessage, style: const TextStyle(color: Colors.red)))
+            : TabBarView(
           children: [
-            _buildUpcomingSessionsTab(),
-            _buildSessionTab("Aucune session réalisée."),
-            _buildSessionTab("Aucune session annulée."),
+            _buildSessionList(_upcomingReservations, "Aucune réservation à venir."),
+            _buildSessionList(_completedReservations, "Aucune session réalisée."),
+            _buildSessionList(_canceledReservations, "Aucune session annulée."),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildUpcomingSessionsTab() {
-    if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    } else if (errorMessage.isNotEmpty) {
+  Widget _buildSessionList(List<dynamic> reservations, String emptyMessage) {
+    if (reservations.isEmpty) {
       return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(errorMessage, style: const TextStyle(color: Colors.red, fontSize: 16), textAlign: TextAlign.center),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _fetchUpcomingReservations,
-                child: const Text('Réessayer'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(emptyMessage, style: const TextStyle(fontSize: 16, color: Colors.grey)),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                // Vous pouvez naviguer vers l'écran de réservation ici.
+                // Par exemple, revenir à l'écran d'accueil ou une page de recherche de services.
+                Navigator.of(context).popUntil((route) => route.isFirst); // Revient à la première route (Home)
+              },
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                backgroundColor: Colors.orange,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
               ),
-            ],
-          ),
+              child: const Text("Réserver", style: TextStyle(fontSize: 16, color: Colors.white)),
+            ),
+          ],
         ),
       );
-    } else if (upcomingReservations.isEmpty) {
-      return _buildSessionTab("Aucune réservation à venir enregistrée !");
     } else {
       return ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemCount: upcomingReservations.length,
+        itemCount: reservations.length,
         itemBuilder: (context, index) {
-          final reservation = upcomingReservations[index];
-          final serviceName = reservation['service']['name'] ?? 'Service Inconnu';
-          final prestatorName = reservation['service']['prestator']['name'] ?? 'Prestataire Inconnu';
-          final servicePrice = reservation['service']['price'] ?? 'N/A';
-          final reservationLocation = reservation['location'] ?? 'Non spécifiée';
-          final reservationDateTime = _formatDateTime(reservation['date'], reservation['time']);
-          final reservationStatus = reservation['status'] ?? 'pending';
+          final reservation = reservations[index];
+          final service = reservation['service'];
+          final prestator = service['prestator'];
+          final category = service['category'];
+
+          // Formatage de la date et l'heure
+          final String formattedDate = DateFormat('dd/MM/yyyy').format(DateTime.parse(reservation['date']));
+          final String formattedTime = DateFormat('HH:mm').format(DateFormat('HH:mm:ss').parse(reservation['time']));
+
+          // Utilise le statut directement de l'API
+          final String reservationStatus = reservation['status'];
 
           return Card(
-            margin: const EdgeInsets.only(bottom: 16.0),
+            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             elevation: 4,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
             child: Padding(
@@ -192,33 +216,61 @@ class _SessionsScreenState extends State<SessionsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    serviceName,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.indigo),
+                    prestator['user']['name'] ?? 'Service Inconnu',
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    'Prestataire: $prestatorName',
-                    style: const TextStyle(fontSize: 16, color: Colors.black87),
+                  Row(
+                    children: [
+                      Icon(Icons.calendar_today, color: Colors.grey[600], size: 18),
+                      const SizedBox(width: 8),
+                      Text('Date: $formattedDate', style: const TextStyle(fontSize: 15)),
+                      const SizedBox(width: 16),
+                      Icon(Icons.access_time, color: Colors.grey[600], size: 18),
+                      const SizedBox(width: 8),
+                      Text('Heure: $formattedTime', style: const TextStyle(fontSize: 15)),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Lieu: $reservationLocation',
-                    style: const TextStyle(fontSize: 16, color: Colors.black87),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on, color: Colors.grey[600], size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(reservation['location'] ?? 'Adresse inconnue', style: const TextStyle(fontSize: 15)),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Date & Heure: $reservationDateTime',
-                    style: const TextStyle(fontSize: 16, color: Colors.black87),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.person, color: Colors.grey[600], size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Prestataire: ${prestator['description'] ?? 'Inconnu'}', // Exemple, affiche la description du prestataire
+                        style: const TextStyle(fontSize: 15),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Tarif: $servicePrice XOF',
-                    style: const TextStyle(fontSize: 16, color: Colors.black87),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.category, color: Colors.grey[600], size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Catégorie: ${category['name'] ?? 'Inconnue'}',
+                        style: const TextStyle(fontSize: 15),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      Text(
+                        'Prix: ${reservation['price'] ?? 'N/A'} FCFA',
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.orange),
+                      ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
@@ -243,28 +295,5 @@ class _SessionsScreenState extends State<SessionsScreen> {
         },
       );
     }
-  }
-
-  Widget _buildSessionTab(String message) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(message, style: const TextStyle(fontSize: 16, color: Colors.grey)),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).popUntil((route) => route.isFirst);
-            },
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-              backgroundColor: Colors.orange,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-            ),
-            child: const Text("Réserver", style: TextStyle(fontSize: 16, color: Colors.white)),
-          ),
-        ],
-      ),
-    );
   }
 }

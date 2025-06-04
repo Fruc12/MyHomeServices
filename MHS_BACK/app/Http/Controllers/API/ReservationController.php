@@ -16,7 +16,7 @@ class ReservationController extends Controller
      */
     public function index(string $role) {
         if ($role == 'customer') {
-            $reservations = Reservation::with(['service.prestator', 'service.category'])->where('customer_id', Auth::id())->get();
+            $reservations = Reservation::with(['service.prestator.user', 'service.category'])->where('customer_id', Auth::id())->get();
         }
         else if ($role == 'prestator') {
             if ( Auth::user()->role == 'customer') {
@@ -61,7 +61,7 @@ class ReservationController extends Controller
         ]);
 
         $validated['date'] = Carbon::createFromDate($request->date)->format('Y-m-d');
-        $validated['time'] = Carbon::createFromDate($request->tome)->format('H:i');
+        $validated['time'] = Carbon::createFromDate($request->time)->format('H:i');
         $reservation = Reservation::create($validated);
 
         return response()->json([

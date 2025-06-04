@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'booking_form_screen.dart'; // Chemin à adapter
-import '/services/services_service.dart'; // Chemin à adapter selon ton projet
+import '/services/services_service.dart';
 
 class PrestatorListScreen extends StatefulWidget {
   final int categoryId;
@@ -208,7 +208,7 @@ class _PrestatorListScreenState extends State<PrestatorListScreen> {
             Row(
               children: [
                 Text(
-                  service['name'] ?? 'Nom inconnu',
+                  service['prestator']['user']['name'] ?? 'Nom inconnu',
                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),
                 ),
                 const SizedBox(width: 8),
