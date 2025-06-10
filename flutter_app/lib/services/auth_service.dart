@@ -12,7 +12,7 @@ class AuthService {
   static const String _userIdKey = 'userId'; // Nouvelle clé pour l'ID utilisateur
 
   // Inscription
-  Future<bool> register(String name, String email, String password, String role) async {
+  Future<bool> register(String name, String email, String phone, String password, String role) async {
     final response = await http.post(
       Uri.parse('${apiUrl}register'),
       headers: {
@@ -22,6 +22,7 @@ class AuthService {
       body: jsonEncode({
         'name': name,
         'email': email,
+        'phone':phone,
         'password': password,
         'role': role,
       }),

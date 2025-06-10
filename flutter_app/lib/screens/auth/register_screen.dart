@@ -16,11 +16,141 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   String? selectedRole;
   bool isLoading = false;
   final List<String> roles = ['Client', 'Prestataire'];
   final AuthService _authService = AuthService();
+
+  // NOUVEAU : État pour basculer la visibilité du mot de passe
+  bool _obscurePassword = true;
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  // MODIFIÉ : Ajout du paramètre suffixIcon
+  InputDecoration _buildInputDecoration({
+    required String label,
+    IconData? icon,
+    Widget? suffixIcon, // NOUVEAU : Paramètre pour l'icône de suffixe
+  }) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Colors.white70),
+      prefixIcon: icon != null
+          ? Icon(icon, color: Colors.white70)
+          : null,
+      suffixIcon: suffixIcon, // NOUVEAU : Utilise l'icône de suffixe
+      filled: true,
+      fillColor: Colors.white.withOpacity(0.1),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      contentPadding: const EdgeInsets.symmetric(
+          vertical: 16, horizontal: 20),
+    );
+  }
+
+  // MODIFIÉ : Ajout du paramètre suffixIcon et utilisation de _obscurePassword
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String? Function(String?) validator,
+    IconData? icon,
+    bool obscureText = false, // MODIFIÉ : Défini sur false par défaut car c'est l'appelant qui le contrôle
+    TextInputType keyboardType = TextInputType.text,
+    Widget? suffixIcon, // NOUVEAU : Paramètre pour l'icône de suffixe
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      validator: validator,
+      style: const TextStyle(color: Colors.white),
+      decoration: _buildInputDecoration(label: label, icon: icon, suffixIcon: suffixIcon), // NOUVEAU : Passe le suffixIcon
+    );
+  }
+
+  Future<void> _register() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      setState(() => isLoading = true);
+      try {
+        final success = await _authService.register(
+          nameController.text.trim(),
+          emailController.text.trim(),
+          phoneController.text.trim(),
+          passwordController.text.trim(),
+          selectedRole == 'Client' ? 'customer' : 'prestator',
+        );
+
+        if (success) {
+          if (selectedRole == 'Prestataire') {
+            // Logique pour les prestataires : tentative de connexion automatique
+            final loginSuccess = await _authService.login(
+              emailController.text.trim(),
+              passwordController.text.trim(),
+            );
+
+            if (loginSuccess) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const PrestatorScreen()),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Inscription réussie, mais connexion automatique échouée. Veuillez vous connecter manuellement.'),
+                  backgroundColor: Colors.orange,
+                ),
+              );
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+              );
+            }
+          } else {
+            // Logique pour les clients
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Inscription réussie. Veuillez vous connecter.'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const LoginScreen()),
+            );
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Échec de l\'inscription. Vérifiez vos informations ou l\'email est déjà utilisé.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Une erreur est survenue: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } finally {
+        if (mounted) {
+          setState(() => isLoading = false);
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,15 +190,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  // const Text(
-                  //   'Incrivez-vous pour rejoindre notre communauté et profiter'
-                  //       'de nos services à domicile.',
-                  //   textAlign: TextAlign.center, // Centre le texte
-                  //   style: TextStyle(
-                  //     color: Colors.black,
-                  //     fontSize: 16,
-                  //   ),
-                  // ),
                   const SizedBox(height: 30),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(20),
@@ -108,13 +229,41 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 },
                               ),
                               const SizedBox(height: 16),
+                              // Champ Numéro de téléphone - AUCUN CHANGEMENT DE STYLE
+                              _buildTextField(
+                                controller: phoneController,
+                                label: 'Numéro de téléphone',
+                                icon: Icons.phone_outlined,
+                                keyboardType: TextInputType.phone,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) return 'Numéro requis';
+                                  if (!RegExp(r'^\d{8,15}$').hasMatch(value)) {
+                                    return 'Numéro invalide';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              // Champ Mot de passe avec icône d'œil - AUCUN CHANGEMENT DE STYLE EN DEHORS DE L'ICÔNE
                               _buildTextField(
                                 controller: passwordController,
                                 label: 'Mot de passe',
                                 icon: Icons.lock_outline,
-                                obscureText: true,
+                                obscureText: _obscurePassword, // Utilise la variable d'état
                                 validator: (value) =>
                                 value!.length < 8 ? '8 caractères minimum' : null,
+                                // NOUVEAU : Ajout de l'icône d'œil pour basculer la visibilité
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                    color: Colors.white70, // Conserve la couleur existante
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscurePassword = !_obscurePassword;
+                                    });
+                                  },
+                                ),
                               ),
                               const SizedBox(height: 16),
                               DropdownButtonFormField<String>(
@@ -131,8 +280,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     setState(() => selectedRole = value),
                                 validator: (value) =>
                                 value == null ? 'Sélectionnez un rôle' : null,
-                                dropdownColor: Colors.grey[850],
-                                style: const TextStyle(color: Colors.white),
+                                dropdownColor: Colors.grey[850], // Conserve la couleur existante
+                                style: const TextStyle(color: Colors.white), // Conserve la couleur existante
                               ),
                               const SizedBox(height: 30),
                               SizedBox(
@@ -141,18 +290,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 child: ElevatedButton(
                                   onPressed: isLoading ? null : _register,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.black,
+                                    backgroundColor: Colors.black, // Conserve la couleur existante
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     elevation: 5,
                                   ),
                                   child: isLoading
-                                      ? const CircularProgressIndicator()
+                                      ? const CircularProgressIndicator(color: Colors.white) // Spécifiez la couleur pour correspondre au design
                                       : const Text(
                                     "S'inscrire",
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: Colors.white, // Conserve la couleur existante
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -184,73 +333,5 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ],
       ),
     );
-  }
-
-  InputDecoration _buildInputDecoration({required String label, IconData? icon}) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: const TextStyle(color: Colors.white70),
-      prefixIcon: icon != null
-          ? Icon(icon, color: Colors.white70)
-          : null,
-      filled: true,
-      fillColor: Colors.white.withOpacity(0.1),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      contentPadding: const EdgeInsets.symmetric(
-          vertical: 16, horizontal: 20),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required String? Function(String?) validator,
-    IconData? icon,
-    bool obscureText = false,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return TextFormField(
-      controller: controller,
-      obscureText: obscureText,
-      keyboardType: keyboardType,
-      validator: validator,
-      style: const TextStyle(color: Colors.white),
-      decoration: _buildInputDecoration(label: label, icon: icon),
-    );
-  }
-
-  Future<void> _register() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      setState(() => isLoading = true);
-      try {
-        final success = await _authService.register(
-          nameController.text.trim(),
-          emailController.text.trim(),
-          passwordController.text.trim(),
-          selectedRole == 'Client' ? 'customer' : 'prestator',
-        );
-
-        if (success) {
-          if (selectedRole == 'Prestataire') {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const PrestatorScreen()),
-            );
-          } else {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const LoginScreen()),
-            );
-          }
-        }
-      } finally {
-        if (mounted) {
-          setState(() => isLoading = false);
-        }
-      }
-    }
   }
 }
