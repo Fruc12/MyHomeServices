@@ -17,7 +17,7 @@ return new class extends Migration
 
             $table->string('description');
             $table->boolean('validate')->default(false);
-            $table->string('path');
+            $table->string('path')->nullable();
             $table->string('address');
 
             $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();

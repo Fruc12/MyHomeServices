@@ -8,6 +8,8 @@ use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+
 class PrestatorController extends Controller
 {
     /**
@@ -60,14 +62,21 @@ class PrestatorController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id|unique:prestators,user_id',
+            // 'user_id' => 'required|exists:users,id|unique:prestators,user_id',
             'description' => 'required|string',
-            'validate' => '|required|boolean',
-            'path' => 'nullable|string',
+            'validate' => 'nullable|boolean',
+            'path' => 'nullable|mimes:jpg,jpeg,png,pdf|max:2048',
             'address' => 'required|string',
         ]);
 
-        return response()->json(Prestator::create($validated), 201);
+        $path = $request->file('path')->store('certificates', 'public');
+        $validated['user_id'] = Auth::id();
+        $validated['validate'] = true;
+
+        $prestator = Prestator::create($validated);
+        $prestator->path = asset('storage/' . $prestator->path);
+
+        return response()->json($prestator, 201);
     }
 
     /**

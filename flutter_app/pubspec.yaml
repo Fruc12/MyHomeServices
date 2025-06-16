@@ -31,6 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   image_picker: ^0.8.7+1 # Pour l'upload de fichiers
+  file_picker: ^10.2.0 # Pour la sélection de fichiers
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
@@ -80,10 +81,10 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/
-    - assets/icons/hair-stylist.jpg
-    - assets/icons/massage-therapist.jpg
-    - assets/icons/sport-coach.jpg
-    - assets/icons/beauty-service.jpg
+#    - assets/icons/hair-stylist.jpg
+#    - assets/icons/massage-therapist.jpg
+#    - assets/icons/sport-coach.jpg
+#    - assets/icons/beauty-service.jpg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

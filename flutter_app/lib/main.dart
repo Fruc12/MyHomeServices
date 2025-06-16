@@ -12,6 +12,7 @@ import 'package:flutter_app/screens/prestator_service_form_screen.dart'; // <-- 
 import 'package:flutter_app/screens/prestator_sessions_screen.dart'; // <-- Importez la nouvelle page
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 

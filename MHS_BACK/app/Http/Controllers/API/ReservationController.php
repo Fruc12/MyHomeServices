@@ -11,7 +11,7 @@ use Carbon\Carbon;
 
 class ReservationController extends Controller
 {
-        /**
+    /**
      * Display a listing of the resource.
      */
     public function index(string $role) {

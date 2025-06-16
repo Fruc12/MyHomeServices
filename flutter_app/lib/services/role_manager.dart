@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart'; // Pour ValueNotifier
 
 class RoleManager extends ChangeNotifier {
 
-  static final ValueNotifier<String> _currentRole = ValueNotifier<String>('client'); // 'client' ou 'prestataire'
+  static final ValueNotifier<String> _currentRole = ValueNotifier<String>('prestataire'); // 'client' ou 'prestataire'
 
   static String get currentRole => _currentRole.value;
 
