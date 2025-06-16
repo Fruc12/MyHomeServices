@@ -54,6 +54,7 @@ class UserController extends Controller
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|min:8',
             'role' => 'required|in:admin,prestator,customer',
+            
         ]);
 
         if (isset($validated['password'])) {

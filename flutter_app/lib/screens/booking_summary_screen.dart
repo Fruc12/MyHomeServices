@@ -1,7 +1,9 @@
+// lib/screens/booking_summary_screen.dart
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:flutter_app/services/auth_service.dart'; // Importez AuthService
 
 class BookingSummaryScreen extends StatefulWidget {
   final Map<String, dynamic> prestator;
@@ -33,26 +35,35 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
       _message = '';
     });
 
-    final DateTime bookingDateTime = DateTime(
-      widget.selectedDate.year,
-      widget.selectedDate.month,
-      widget.selectedDate.day,
-      widget.selectedTime.hour,
-      widget.selectedTime.minute,
-    );
+    final String? authToken = await AuthService().getToken();
+    final int? userId = await AuthService().getUserId();
 
-    final String apiUrl = 'http://localhost:8000/api/bookings';
+    if (authToken == null || userId == null) {
+      setState(() {
+        _message = 'Erreur : Utilisateur non authentifié. Veuillez vous reconnecter.';
+        _isLoading = false;
+      });
+      return;
+    }
+
+    final String bookingDate = DateFormat('yyyy-MM-dd').format(widget.selectedDate);
+    final String bookingTime = '${widget.selectedTime.hour.toString().padLeft(2, '0')}:${widget.selectedTime.minute.toString().padLeft(2, '0')}:00';
+
+    final String apiUrl = 'http://localhost:8000/api/reservations';
 
     try {
       final response = await http.post(
         Uri.parse(apiUrl),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken', // AJOUT DE L'EN-TÊTE D'AUTORISATION
+        },
         body: json.encode({
-          'prestator_id': widget.prestator['id'],
-          'client_id': 1, // Assuming a fixed client_id for now
-          'address': widget.address,
-          'phone_number': widget.phoneNumber,
-          'booking_time': bookingDateTime.toIso8601String(),
+          'service_id': widget.prestator['id'],
+          'customer_id': userId, // UTILISATION DE L'ID UTILISATEUR RÉCUPÉRÉ
+          'location': widget.address,
+          'date': bookingDate,
+          'time': bookingTime,
           'status': 'pending',
         }),
       );
@@ -176,7 +187,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 20),
-                      _buildSummaryRow('Prestataire', widget.prestator['name'] ?? 'Nom inconnu', Icons.person),
+                      _buildSummaryRow('Prestataire', widget.prestator['prestator']['user']['name'] ?? 'Nom inconnu', Icons.person),
                       const Divider(),
                       _buildSummaryRow('Adresse', widget.address, Icons.location_on),
                       const Divider(),
