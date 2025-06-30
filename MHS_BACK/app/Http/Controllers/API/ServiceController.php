@@ -107,10 +107,11 @@ class ServiceController extends Controller
     public function getRating(Service $service) {
         // dd($service->reservations->load('rate')->toArray());
         $ratings = $service->reservations->map(function ($reservation) {
-            return $reservation->rate ? $reservation->rate->rating : 0;
+            return $reservation->rate ? $reservation->rate->rating : -1; // Use -1 for reservations without a rate
         })->filter(function ($rating) {
-            return $rating > 0; // Exclude zero ratings
+            return $rating >= 0 ; // Excludes reservations that have missing rate
         });
+        
         $average = $ratings->avg();
         $number = $ratings->count();
 
