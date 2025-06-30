@@ -91,17 +91,17 @@ class ReservationController extends Controller
     public function update(Request $request, Reservation $reservation)
     {
         $validated = $request->validate([
-            'service_id' => 'required|exists:services,id',
+            'service_id' => 'sometimes|exists:services,id',
             'customer_id' => 'nullable|exists:users,id',
-            'status' => 'required|in:pending,in_progress,completed,canceled,reported',
-            'date' => 'required|date|after:today',
-            'time' => 'required|date_format:H:i,H:i:s',
-            'location' => 'required|string|max:255',
+            'status' => 'sometimes|in:pending,in_progress,completed,canceled,reported',
+            'date' => 'sometimes|date|after:today',
+            'time' => 'sometimes|date_format:H:i,H:i:s',
+            'location' => 'sometimes|string|max:255',
             'price' => 'nullable|integer|min:0',
         ]);
 
-        $validated['date'] = Carbon::createFromDate($request->date)->format('Y-m-d');
-        $validated['time'] = Carbon::createFromDate($request->tome)->format('H:i');
+        // $validated['date'] = Carbon::createFromDate($request->date)->format('Y-m-d');
+        // $validated['time'] = Carbon::createFromDate($request->tome)->format('H:i');
 
         $reservation->update($validated);
 
