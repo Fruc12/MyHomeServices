@@ -24,7 +24,7 @@ class Prestator extends Model
 
     public function services()
     {
-        return $this->hasMany(Service::class, 'prestator_id');
+        return $this->hasMany(Service::class);
     }
 
     // public function documents()

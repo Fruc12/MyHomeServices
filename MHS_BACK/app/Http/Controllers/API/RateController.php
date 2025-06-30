@@ -11,28 +11,20 @@ class RateController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        //
-        return Rate::with('prestation')->get();
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+    public function index() {
+        return response()->json([
+            'success' => true,
+            'message' => 'Liste des évaluations récupérée avec succès.',
+            'data' => Rate::with('reservation')->get(),
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        //
+    public function store(Request $request) {
         $validated = $request->validate([
-            'prestatation_id' => 'required|exists:services,id',
+            'reservation_id' => 'required|exists:reservations,id|unique:rates,reservation_id',
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string'
         ]);
@@ -44,26 +36,14 @@ class RateController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Rate $rate)
-    {
-        //
-        return $rate->load('prestations');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Rate $rate)
-    {
-        //
+    public function show(Rate $rate) {
+        return $rate->load('reservation.service');
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Rate $rate)
-    {
-        //
+    public function update(Request $request, Rate $rate) {
         $validated = $request->validate([
             'rating' => 'sometimes|integer|min:1|max:5',
             'comment' => 'nullable|string'
@@ -77,11 +57,12 @@ class RateController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Rate $rate)
-    {
-        //
+    public function destroy(Rate $rate) {
         $rate->delete();
-        return response(null, 204);
+        return response([
+            'success' => true,
+            'message' => 'Évaluation supprimée avec succès.'
+        ]);
 
     }
 }

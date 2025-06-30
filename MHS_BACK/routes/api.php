@@ -22,6 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('prestators', PrestatorController::class);
     Route::apiResource('categories', CategoryController::class);
     Route::get('categories/{category}/services', [CategoryController::class, 'getCategoryServices']);
+    Route::get('services/{service}/rate', [ServiceController::class, 'getRating']);
     Route::apiResource('services', ServiceController::class)->except(['index']);
     
     Route::get('reservations/{role}', [ReservationController::class, 'index'])->where('role', 'customer|prestator');

@@ -46,15 +46,17 @@ class ReservationSeeder extends Seeder
             
         ]);
         
-        Reservation::create([
-            'service_id' => 3,
-            'customer_id' => 3,
-            'status' => 'completed',
-            'status' => 'completed',
-            'date' => Carbon::now()->subDays(2),
-            'time' => Carbon::now()->subHours(3)->format('H:i:s'),
-            'location' => '123 Rue de Paris, Paris',
-            'price' => 150,
-        ]);
+        foreach (['pending', 'in_progress', 'completed', 'canceled', 'reported'] as $status) {
+            Reservation::create([
+                'service_id' => 3,
+                'customer_id' => 2,
+                'status' => 'completed',
+                'status' => $status,
+                'date' => Carbon::now()->subDays(2),
+                'time' => Carbon::now()->subHours(3)->format('H:i:s'),
+                'location' => '123 Rue de Paris, Paris',
+                'price' => 150,
+            ]);
+        }
     }
 }

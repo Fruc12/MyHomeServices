@@ -26,7 +26,7 @@ class ReservationController extends Controller
                 ], 403);
             }
             $reservations = Reservation::with(['customer', 'service.category'])->whereHas('service', function ($query) {
-                $query->where('prestator_id', Auth::id());
+                $query->where('prestator_id', Auth::user()->prestator->id);
             })->get();
         } else {
             return response()->json([

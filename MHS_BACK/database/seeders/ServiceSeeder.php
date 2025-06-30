@@ -100,38 +100,25 @@ class ServiceSeeder extends Seeder
         }
 
         // --- Exemples de services spécifiques avec des IDs réels de prestataires ---
-        // Assurez-vous que 'jean.prestataire@example.com' est un utilisateur qui a un enregistrement dans la table `prestators`
-        $jeanPrestataireUser = User::where('email', 'jean.prestataire@example.com')->first();
 
-        if ($jeanPrestataireUser) {
-            $jeanPrestataireProfile = Prestator::where('user_id', $jeanPrestataireUser->id)->first();
+        // Service de Coiffure pour Jean (s'il est coiffeur)
+        if ($categories->has('Coiffure')) {
+            Service::create([
+                'category_id' => $categories['Coiffure']->id,
+                'prestator_id' => 3, // ID de prestator
+                'name' => 'Coupe Homme Tendance',
+                'description' => 'Coupe et stylisation moderne pour hommes, conseils personnalisés.',
+            ]);
+        }
 
-            if ($jeanPrestataireProfile) {
-                // Service de Coiffure pour Jean (s'il est coiffeur)
-                if ($categories->has('Coiffure')) {
-                    Service::create([
-                        'category_id' => $categories['Coiffure']->id,
-                        'prestator_id' => $jeanPrestataireProfile->id,
-                        'name' => 'Coupe Homme Tendance',
-                        'description' => 'Coupe et stylisation moderne pour hommes, conseils personnalisés.',
-                    ]);
-                }
-
-                // Service de Massage pour Jean (s'il est masseur)
-                if ($categories->has('Massage')) {
-                    Service::create([
-                        'category_id' => $categories['Massage']->id,
-                        'prestator_id' => $jeanPrestataireProfile->id,
-                        'name' => 'Massage aux Huiles Essentielles',
-                        'description' => 'Massage relaxant avec des huiles essentielles pour une détente profonde.',
-                    ]);
-                }
-                // Ajoutez d'autres services spécifiques si nécessaire
-            } else {
-                $this->command->warn('L\'utilisateur jean.prestataire@example.com n\'a pas de profil prestataire.');
-            }
-        } else {
-            $this->command->warn('L\'utilisateur jean.prestataire@example.com n\'a pas été trouvé. Veuillez exécuter UserSeeder d\'abord.');
+        // Service de Massage pour Jean (s'il est masseur)
+        if ($categories->has('Massage')) {
+            Service::create([
+                'category_id' => $categories['Massage']->id,
+                'prestator_id' => 3, // ID de prestator
+                'name' => 'Massage aux Huiles Essentielles',
+                'description' => 'Massage relaxant avec des huiles essentielles pour une détente profonde.',
+            ]);
         }
     }
 }

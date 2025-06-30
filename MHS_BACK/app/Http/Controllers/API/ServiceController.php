@@ -13,19 +13,14 @@ class ServiceController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
+    public function index() {
         //
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-       
-        $request->customer_id = Auth::id();
-        
+    public function store(Request $request) {
         $validated = $request->validate([
             'prestator_id' => 'required|exists:users,id',
             'category_id' => 'required|exists:categories,id',
@@ -33,6 +28,7 @@ class ServiceController extends Controller
             'description' => 'required|string',
         ]);
 
+        $validated['customer_id'] = Auth::id();
         $validated['date'] = Carbon::createFromDate($request->date)->format('Y-m-d');
         $service = Service::create($validated);
 
@@ -46,9 +42,8 @@ class ServiceController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
-    {
-        $service = Service::with(['category', 'prestator'])->find($id);
+    public function show(Service $service) {
+        $service = $service->load(['category', 'prestator']);
 
         if (!$service) {
             return response()->json([
@@ -66,16 +61,13 @@ class ServiceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
-    {
+    public function update(Request $request, Service $service) {
         $validated = $request->validate([
             'prestator_id' => 'required|exists:users,id',
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
             'description' => 'required|string',
         ]);
-
-        $service = Service::find($id);
 
         if (!$service) {
             return response()->json([
@@ -90,16 +82,13 @@ class ServiceController extends Controller
             'success' => true,
             'message' => 'Service mis à jour avec succès.',
             'data' => $service
-        ], 200);
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
-    {
-        $service = Service::find($id);
-
+    public function destroy(Service $service) {
         if (!$service) {
             return response()->json([
                 // 'success' => false,
@@ -112,6 +101,28 @@ class ServiceController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Service supprimé avec succès.'
-        ], 200);
+        ]);
     }
+
+    public function getRating(Service $service) {
+        // dd($service->reservations->load('rate')->toArray());
+        $ratings = $service->reservations->map(function ($reservation) {
+            return $reservation->rate ? $reservation->rate->rating : 0;
+        })->filter(function ($rating) {
+            return $rating > 0; // Exclude zero ratings
+        });
+        $average = $ratings->avg();
+        $number = $ratings->count();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Évaluation récupérée avec succès.',
+            'data' => [
+                'rate' => $average,
+                'number' => $number,
+            ]
+        ]);
+
+    }
+
 }
