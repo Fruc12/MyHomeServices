@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
-import 'package:flutter_app/services/auth_service.dart'; // Importez AuthService
+import 'package:flutter_app/services/auth_service.dart';
+
+import '../services/http_service.dart'; // Importez AuthService
 
 class BookingSummaryScreen extends StatefulWidget {
   final Map<String, dynamic> prestator;
@@ -49,13 +51,14 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
     final String bookingDate = DateFormat('yyyy-MM-dd').format(widget.selectedDate);
     final String bookingTime = '${widget.selectedTime.hour.toString().padLeft(2, '0')}:${widget.selectedTime.minute.toString().padLeft(2, '0')}:00';
 
-    final String apiUrl = 'http://localhost:8000/api/reservations';
+    final String apiUrl = '${HttpService.getBaseUrl()}reservations';
 
     try {
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
           'Authorization': 'Bearer $authToken', // AJOUT DE L'EN-TÊTE D'AUTORISATION
         },
         body: json.encode({

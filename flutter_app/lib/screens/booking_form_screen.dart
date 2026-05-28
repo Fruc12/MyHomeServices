@@ -29,8 +29,8 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
+      initialDate: _selectedDate ?? DateTime.now().add(Duration(days: 1)),
+      firstDate: DateTime.now().add(Duration(days: 1)),
       lastDate: DateTime(2028),
     );
     if (picked != null && picked != _selectedDate) {
